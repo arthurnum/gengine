@@ -3,10 +3,11 @@ require 'opengl'
 
 require 'pry'
 
+include Gl
+
 require_relative 'glsl/program.rb'
 require_relative 'glsl/shader.rb'
 
-include Gl
 include GLSL
 
 vertex_shader_code = %q(

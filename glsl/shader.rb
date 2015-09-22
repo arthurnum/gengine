@@ -1,10 +1,6 @@
-require 'opengl'
-
 module GLSL
   class Shader
-    include Gl
-
-    TYPES = { vertex: GL_VERTEX_SHADER, 
+    TYPES = { vertex: GL_VERTEX_SHADER,
               fragment: GL_FRAGMENT_SHADER }
 
     attr_reader :id

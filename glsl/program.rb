@@ -1,9 +1,5 @@
-require 'opengl'
-
 module GLSL
   class Program
-    include Gl
-
     def initialize
       @id = glCreateProgram
     end
