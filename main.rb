@@ -3,7 +3,11 @@ require 'opengl'
 
 require 'pry'
 
+require_relative 'glsl/program.rb'
+require_relative 'glsl/shader.rb'
+
 include Gl
+include GLSL
 
 vertex_shader_code = %q(
     #version 330
@@ -22,7 +26,6 @@ fragment_shader_code = %q(
       out_color = vec4(1, 1, 1, 0);
     }
   )
-
 
 
 def render
@@ -47,24 +50,13 @@ context = SDL2::GL::Context.create(window)
 glViewport(0, 0, 1024, 768)
 glClearColor(0,0,0,0)
 
-vertex_shader_id = glCreateShader(GL_VERTEX_SHADER)
-glShaderSource(vertex_shader_id, vertex_shader_code)
-glCompileShader(vertex_shader_id)
-p glGetShaderiv(vertex_shader_id, GL_COMPILE_STATUS)
-p glGetShaderInfoLog(vertex_shader_id)
+vertex_shader = Shader.new(:vertex, vertex_shader_code)
 
-fragment_shader_id = glCreateShader(GL_FRAGMENT_SHADER)
-glShaderSource(fragment_shader_id, fragment_shader_code)
-glCompileShader(fragment_shader_id)
-p glGetShaderiv(fragment_shader_id, GL_COMPILE_STATUS)
-p glGetShaderInfoLog(fragment_shader_id)
+fragment_shader = Shader.new(:fragment, fragment_shader_code)
 
-program_id = glCreateProgram
-glAttachShader(program_id, vertex_shader_id)
-glAttachShader(program_id, fragment_shader_id)
-glLinkProgram(program_id)
-glUseProgram(program_id)
-p glGetProgramiv(program_id, GL_LINK_STATUS)
+program = Program.new
+program.attach_shaders(vertex_shader, fragment_shader)
+program.link_and_use
 
 # You can use OpenGL functions
 loop do
