@@ -45,12 +45,18 @@ def render
           -1.0,  1.0,
            1.0, -1.0,
            1.0,  1.0]
+  indices = [0, 1, 2, 3]
 
   glBufferData(GL_ARRAY_BUFFER, 4*8, data.pack('F*'), GL_STREAM_DRAW)
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0)
   glEnableVertexAttribArray(0)
 
-  glDrawArrays(GL_TRIANGLE_STRIP, 0, 4)
+  ib = '    '
+  glGenBuffers(1, ib)
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib.unpack('L')[0])
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, 4*4, indices.pack('I*'), GL_STREAM_DRAW)
+
+  glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, 0);
 end
 
 SDL2.init(SDL2::INIT_EVERYTHING)
