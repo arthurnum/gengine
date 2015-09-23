@@ -3,7 +3,9 @@ require 'opengl'
 
 require 'pry'
 
-include Gl
+
+OpenGL.load_lib
+include OpenGL
 
 require_relative 'glsl/program.rb'
 require_relative 'glsl/shader.rb'
@@ -12,10 +14,10 @@ include GLSL
 
 vertex_shader_code = %q(
     #version 330
-    layout(location=0) in vec2 position;
+    layout(location=0) in vec2 pos;
     void main()
     {
-      gl_Position = vec4(position, 0, 0);
+      gl_Position = vec4(pos.x, pos.y, 0.0, 10.0);
     }
   )
 
@@ -24,13 +26,31 @@ fragment_shader_code = %q(
     out vec4 out_color;
     void main()
     {
-      out_color = vec4(1, 1, 1, 0);
+      out_color = vec4(1.0, 1.0, 1.0, 1.0);
     }
   )
 
 
 def render
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+
+  vao = '    '
+  glGenVertexArrays(1, vao)
+  glBindVertexArray(vao.unpack('L')[0])
+
+  posBuf = '    '
+  glGenBuffers(1, posBuf)
+  glBindBuffer(GL_ARRAY_BUFFER, posBuf.unpack('L')[0])
+  data = [-1.0, -1.0,
+          -1.0,  1.0,
+           1.0, -1.0,
+           1.0,  1.0]
+
+  glBufferData(GL_ARRAY_BUFFER, 4*8, data.pack('F*'), GL_STREAM_DRAW)
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0)
+  glEnableVertexAttribArray(0)
+
+  glDrawArrays(GL_TRIANGLE_STRIP, 0, 4)
 end
 
 SDL2.init(SDL2::INIT_EVERYTHING)

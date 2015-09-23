@@ -7,7 +7,7 @@ module GLSL
 
     def initialize(type, source)
       @id = glCreateShader(TYPES[type])
-      glShaderSource(@id, source)
+      glShaderSource(@id, 1, [source].pack('p'), [source.size].pack('I'))
       glCompileShader(@id)
     end
   end
