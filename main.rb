@@ -7,8 +7,8 @@ require 'pry'
 OpenGL.load_lib
 include OpenGL
 
-require_relative 'glsl/program.rb'
-require_relative 'glsl/shader.rb'
+require_relative 'glsl/glsl'
+require_relative 'drawing/drawing'
 
 include GLSL
 
