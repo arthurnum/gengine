@@ -1,5 +1,6 @@
 require_relative 'vao'
 require_relative 'vbo'
+require_relative 'matrix'
 require_relative 'data/base'
 require_relative 'data/float'
 require_relative 'data/uint'
