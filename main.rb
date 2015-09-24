@@ -96,7 +96,7 @@ far = 10.0
 u1 = (far + near) / (near - far)
 u2 = (2.0 * far * near) / (near - far)
 
-program.uniform_matrix4(Matrix[[(f/aspect),0,0,0], [0,f,0,0], [0,0,u1,u2], [0,0,-1,0]].transpose, 'MVP')
+program.uniform_matrix4(Matrix[[(f/aspect),0,0,0], [0,f,0,0], [0,0,u1,u2], [0,0,-1,0]], 'MVP')
 
 # You can use OpenGL functions
 loop do
