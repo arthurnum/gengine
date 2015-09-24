@@ -38,23 +38,23 @@ def render
   glGenVertexArrays(1, vao)
   glBindVertexArray(vao.unpack('L')[0])
 
-  posBuf = '    '
-  glGenBuffers(1, posBuf)
-  glBindBuffer(GL_ARRAY_BUFFER, posBuf.unpack('L')[0])
   data = [-1.0, -1.0,
           -1.0,  1.0,
            1.0, -1.0,
            1.0,  1.0]
-  indices = [0, 1, 2, 3]
+  inds = [0, 1, 2, 3]
 
-  glBufferData(GL_ARRAY_BUFFER, 4*8, data.pack('F*'), GL_STREAM_DRAW)
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0)
+  vertices = Drawing::Data::Float.new(data)
+  vbo = Drawing::VBO.new(:vertex)
+  vbo.bind
+  vbo.data(vertices)
   glEnableVertexAttribArray(0)
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0)
 
-  ib = '    '
-  glGenBuffers(1, ib)
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ib.unpack('L')[0])
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, 4*4, indices.pack('I*'), GL_STREAM_DRAW)
+  indices = Drawing::Data::UInt.new(inds)
+  vbo2 = Drawing::VBO.new(:index)
+  vbo2.bind
+  vbo2.data(indices)
 
   glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, 0);
 end
@@ -78,7 +78,6 @@ glViewport(0, 0, 1024, 768)
 glClearColor(0,0,0,0)
 
 vertex_shader = Shader.new(:vertex, vertex_shader_code)
-
 fragment_shader = Shader.new(:fragment, fragment_shader_code)
 
 program = Program.new

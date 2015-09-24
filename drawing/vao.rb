@@ -1,5 +1,5 @@
 module Drawing
   class VAO
-    raise NotImplementedError
+    # raise NotImplementedError
   end
 end
