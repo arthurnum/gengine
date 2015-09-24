@@ -23,5 +23,16 @@ module GLSL
     def link_and_use
       link; use
     end
+
+    def uniform_matrix4(matrix, name)
+      ul = get_uniform_location(name)
+      glUniformMatrix4fv(ul, 1, GL_FALSE, matrix.to_a.flatten.pack('F*'));
+    end
+
+    private
+
+    def get_uniform_location(name)
+      glGetUniformLocation(@id, name)
+    end
   end
 end

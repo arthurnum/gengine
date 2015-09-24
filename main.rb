@@ -1,5 +1,6 @@
 require 'sdl2'
 require 'opengl'
+require 'matrix'
 
 require 'pry'
 
@@ -15,9 +16,10 @@ include GLSL
 vertex_shader_code = %q(
     #version 330
     layout(location=0) in vec2 pos;
+    uniform mat4 MVP;
     void main()
     {
-      gl_Position = vec4(pos.x, pos.y, 0.0, 10.0);
+      gl_Position = MVP * vec4(pos.x, pos.y, 0.0, 1.0);
     }
   )
 
@@ -76,6 +78,7 @@ context = SDL2::GL::Context.create(window)
 
 glViewport(0, 0, 1024, 768)
 glClearColor(0,0,0,0)
+# glEnable(GL_DEPTH_TEST)
 
 vertex_shader = Shader.new(:vertex, vertex_shader_code)
 fragment_shader = Shader.new(:fragment, fragment_shader_code)
@@ -83,6 +86,7 @@ fragment_shader = Shader.new(:fragment, fragment_shader_code)
 program = Program.new
 program.attach_shaders(vertex_shader, fragment_shader)
 program.link_and_use
+program.uniform_matrix4(Matrix[[1,2,1,1],[1,1,1,1],[2,2,2,2],[1,2,3,4]], 'MVP')
 
 # You can use OpenGL functions
 loop do
