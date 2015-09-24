@@ -19,7 +19,7 @@ vertex_shader_code = %q(
     uniform mat4 MVP;
     void main()
     {
-      gl_Position = MVP * vec4(pos.x, pos.y, 0.0, 1.0);
+      gl_Position = MVP * vec4(pos.x, pos.y, -5.0, 1.0);
     }
   )
 
@@ -86,7 +86,17 @@ fragment_shader = Shader.new(:fragment, fragment_shader_code)
 program = Program.new
 program.attach_shaders(vertex_shader, fragment_shader)
 program.link_and_use
-program.uniform_matrix4(Matrix[[1,2,1,1],[1,1,1,1],[2,2,2,2],[1,2,3,4]], 'MVP')
+
+aspect = 1024.0 / 768.0
+angle = 55.0 * Math::PI / 180.0
+fovy = angle / 2.0
+f = Math.cos(fovy) / Math.sin(fovy)
+near = 0.1
+far = 10.0
+u1 = (far + near) / (near - far)
+u2 = (2.0 * far * near) / (near - far)
+
+program.uniform_matrix4(Matrix[[(f/aspect),0,0,0], [0,f,0,0], [0,0,u1,u2], [0,0,-1,0]].transpose, 'MVP')
 
 # You can use OpenGL functions
 loop do
