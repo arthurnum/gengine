@@ -103,6 +103,9 @@ mvp_matrix = @projection_matrix * @view_matrix * @model_matrix
 
 model_mode = false
 
+time_a = Time.now
+frames = 0.0
+
 # You can use OpenGL functions
 loop do
   while ev = SDL2::Event.poll
@@ -125,6 +128,14 @@ loop do
   end
   render
   window.gl_swap
+  frames += 1.0
+  time_b = Time.now
+  delta = time_b - time_a
+  if delta > 2.0
+    p "FPS #{frames / delta}"
+    time_a = time_b
+    frames = 0
+  end
 end
 
 # Delete the context after using OpenGL functions
