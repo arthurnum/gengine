@@ -43,14 +43,17 @@ def render
   glGenVertexArrays(1, vao)
   glBindVertexArray(vao.unpack('L')[0])
 
-  data = [-1.0, -1.0, -3.0,
-          -1.0,  1.0, -3.0,
-           1.0, -1.0, -3.0,
-           1.0,  1.0, -3.0,
-           1.0, -1.0, -5.0,
-           1.0,  1.0, -5.0
-         ]
-  inds = [0, 1, 2, 3, 4, 5]
+  # data = [-1.0, -1.0, -3.0,
+  #         -1.0,  1.0, -3.0,
+  #          1.0, -1.0, -3.0,
+  #          1.0,  1.0, -3.0,
+  #          1.0, -1.0, -5.0,
+  #          1.0,  1.0, -5.0
+  #        ]
+  # inds = [0, 1, 2, 3, 4, 5]
+  landscape = Drawing::Object::Landscape.new(10)
+  data = landscape.data
+  inds = landscape.indices
 
   vertices = Drawing::Data::Float.new(data)
   vbo = Drawing::VBO.new(:vertex)
@@ -65,7 +68,7 @@ def render
   vbo2.data(indices)
 
   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
-  glDrawElements(GL_TRIANGLE_STRIP, 6, GL_UNSIGNED_INT, 0);
+  glDrawElements(GL_TRIANGLE_STRIP, inds.size, GL_UNSIGNED_INT, 0);
 end
 
 SDL2.init(SDL2::INIT_EVERYTHING)
