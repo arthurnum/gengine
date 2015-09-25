@@ -31,9 +31,13 @@ fragment_shader_code = %q(
     }
   )
 
+@projection_matrix = @view_matrix = @model_matrix = Drawing::Matrix.identity(4)
 
 def render
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+
+  mvp_matrix = @projection_matrix * @view_matrix * @model_matrix
+  @program.uniform_matrix4(mvp_matrix, 'MVP')
 
   vao = '    '
   glGenVertexArrays(1, vao)
@@ -86,16 +90,18 @@ glClearColor(0,0,0,0)
 vertex_shader = Shader.new(:vertex, vertex_shader_code)
 fragment_shader = Shader.new(:fragment, fragment_shader_code)
 
-program = Program.new
-program.attach_shaders(vertex_shader, fragment_shader)
-program.link_and_use
+@program = Program.new
+@program.attach_shaders(vertex_shader, fragment_shader)
+@program.link_and_use
 
-projection_matrix = Drawing::Matrix.perspective(55.0, 1024.0, 768.0, 0.1, 10.0)
-view_matrix = Drawing::Matrix.look_at(Vector[2.0, 5.0, 2.0], Vector[0.0, 0.0, -4.0], Vector[0.0, 1.0, 0.0])
-model_matrix = Drawing::Matrix.identity(4)
+@projection_matrix = Drawing::Matrix.perspective(55.0, 1024.0, 768.0, 0.1, 10.0)
+@view_matrix = Drawing::Matrix.look_at(Vector[2.0, 5.0, 2.0], Vector[0.0, 0.0, -4.0], Vector[0.0, 1.0, 0.0])
+@model_matrix = Drawing::Matrix.identity(4)
 
-mvp_matrix = projection_matrix * view_matrix * model_matrix
-program.uniform_matrix4(mvp_matrix, 'MVP')
+mvp_matrix = @projection_matrix * @view_matrix * @model_matrix
+@program.uniform_matrix4(mvp_matrix, 'MVP')
+
+model_mode = false
 
 # You can use OpenGL functions
 loop do
@@ -106,10 +112,19 @@ loop do
     if SDL2::Event::Window === ev && ev.event == SDL2::Event::Window::RESIZED
       p 'Augh! RESIZED!'
     end
+    if SDL2::Event::MouseButtonUp === ev && ev.clicks > 1
+      model_mode = !model_mode
+      p "Model mode #{model_mode ? 'ON' : 'OFF'}"
+    end
+    if SDL2::Event::MouseMotion === ev && model_mode
+      @model_matrix = @model_matrix.translate(ev.xrel*0.01, -ev.yrel*0.01, 0.0)
+    end
+    if SDL2::Event::MouseWheel === ev && model_mode
+      @model_matrix = @model_matrix.translate(0.0, 0.0, -ev.y*0.1)
+    end
   end
   render
   window.gl_swap
-  sleep 0.1
 end
 
 # Delete the context after using OpenGL functions
