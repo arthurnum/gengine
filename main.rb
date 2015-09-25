@@ -89,26 +89,10 @@ fragment_shader = Shader.new(:fragment, fragment_shader_code)
 program = Program.new
 program.attach_shaders(vertex_shader, fragment_shader)
 program.link_and_use
+
 projection_matrix = Drawing::Matrix.perspective(55.0, 1024.0, 768.0, 0.1, 10.0)
+view_matrix = Drawing::Matrix.look_at(Vector[2.0, 5.0, 2.0], Vector[0.0, 0.0, -4.0], Vector[0.0, 1.0, 0.0])
 model_matrix = Drawing::Matrix.identity(4)
-####
-eye = Vector[2.0, 5.0, 2.0]
-center = Vector[0.0, 0.0, -4.0]
-up = Vector[0.0, 1.0, 0.0]
-f = center - eye
-f = f.normalize
-
-s = up.cross_product f
-s = s.normalize
-
-u = f.cross_product s
-u = u.normalize
-f = f * (-1)
-eye = eye * (-1)
-bufm = Drawing::Matrix[[*s, 0],[*u, 0],[*f, 0],[0,0,0,1]]
-emat = Drawing::Matrix[[1,0,0,eye[0]],[0,1,0,eye[1]],[0,0,1,eye[2]],[0,0,0,1]]
-view_matrix = bufm * emat
-####
 
 mvp_matrix = projection_matrix * view_matrix * model_matrix
 program.uniform_matrix4(mvp_matrix, 'MVP')
