@@ -83,7 +83,7 @@ def render
   @program.uniform_matrix4(@model_matrix, 'M')
   @program.uniform_matrix4(@view_matrix, 'V')
 
-  glDrawElements(GL_TRIANGLE_STRIP, @inds.size, GL_UNSIGNED_INT, 0);
+  glDrawElements(GL_TRIANGLE_STRIP, @count, GL_UNSIGNED_INT, 0);
 end
 
 SDL2.init(SDL2::INIT_EVERYTHING)
@@ -128,29 +128,25 @@ mvp_matrix = @projection_matrix * @view_matrix * @model_matrix
   glGenVertexArrays(1, vao)
   glBindVertexArray(vao.unpack('L')[0])
 
-  landscape = Drawing::Object::Landscape.new(50)
-  data = landscape.data
-  data_normals = landscape.normals
-  @inds = landscape.indices
+  landscape = Drawing::Object::Landscape.new(100)
 
-  vertices = Drawing::Data::Float.new(data)
   vbo = Drawing::VBO.new(:vertex)
   vbo.bind
-  vbo.data(vertices)
+  vbo.data(landscape.vertices_data)
   glEnableVertexAttribArray(0)
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0)
 
-  normals = Drawing::Data::Float.new(data_normals)
   vbo = Drawing::VBO.new(:vertex)
   vbo.bind
-  vbo.data(normals)
+  vbo.data(landscape.normals_data)
   glEnableVertexAttribArray(1)
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0)
 
-  indices = Drawing::Data::UInt.new(@inds)
   vbo2 = Drawing::VBO.new(:index)
   vbo2.bind
-  vbo2.data(indices)
+  vbo2.data(landscape.indices_data)
+
+  @count = landscape.size
 
 model_mode = false
 
