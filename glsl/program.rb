@@ -26,7 +26,12 @@ module GLSL
 
     def uniform_matrix4(matrix, name)
       ul = get_uniform_location(name)
-      glUniformMatrix4fv(ul, 1, GL_TRUE, matrix.to_a.flatten.pack('F*'));
+      glUniformMatrix4fv(ul, 1, GL_TRUE, matrix.to_a.flatten.pack('F*'))
+    end
+
+    def uniform_vector(vector, name)
+      ul = get_uniform_location(name)
+      glUniform3fv(ul, 1, vector.to_a.pack('F*'))
     end
 
     private

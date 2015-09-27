@@ -1,11 +1,14 @@
 require 'sdl2'
 require 'opengl'
+require 'glu'
 
 require 'pry'
 
 
 OpenGL.load_lib
+GLU.load_lib
 include OpenGL
+include GLU
 
 require_relative 'glsl/glsl'
 require_relative 'drawing/drawing'
@@ -19,7 +22,9 @@ vertex_shader_code = %q(
     uniform mat4 MVP;
     uniform mat4 M;
     uniform mat4 V;
+    uniform vec3 cursorPoint;
 
+    out vec4 cursorColor;
     out float light_K;
     void main()
     {
@@ -45,19 +50,25 @@ vertex_shader_code = %q(
 
       light_K = clamp( dot(n, l), 0, 1 );
       gl_Position = MVP * vec4(pos, 1.0);
+
+      vec3 distance_vector = pos.xyz - cursorPoint;
+      float distance = length(distance_vector);
+      float r = 1.0 * (0.25 - distance);
+      cursorColor = r > 0 ? vec4(1.0, 0.0, 0.0, 1.0) : vec4(0.8, 0.8, 0.8, 1.0);
     }
   )
 
 fragment_shader_code = %q(
     #version 330 core
     in float light_K;
+    in vec4 cursorColor;
 
     out vec4 out_color;
     void main()
     {
-      vec4 materialColor = vec4(0.8, 0.8, 0.8, 1.0);
+      vec4 materialColor = cursorColor;
       vec4 materialAmbientColor = vec4(0.1, 0.1, 0.1, 1.0) * materialColor;
-      vec4 lightColor = vec4(0.8, 0.8, 0.8, 1.0);
+      vec4 lightColor = vec4(1.0, 1.0, 1.0, 1.0);
       out_color = materialAmbientColor + materialColor * lightColor * light_K;
     }
   )
@@ -77,6 +88,8 @@ end
 
 SDL2.init(SDL2::INIT_EVERYTHING)
 SDL2::GL.set_attribute(SDL2::GL::DOUBLEBUFFER, 1)
+SDL2::GL.set_attribute(SDL2::GL::DEPTH_SIZE, 24)
+SDL2::GL.set_attribute(SDL2::GL::STENCIL_SIZE, 8)
 SDL2::GL.set_attribute(SDL2::GL::CONTEXT_MAJOR_VERSION, 3)
 SDL2::GL.set_attribute(SDL2::GL::CONTEXT_MINOR_VERSION, 3)
 SDL2::GL.set_attribute(SDL2::GL::CONTEXT_PROFILE_MASK, SDL2::GL::CONTEXT_PROFILE_CORE)
@@ -90,9 +103,11 @@ window = SDL2::Window.create('GENGINE', 0, 0, 1024, 768,
 # Create a OpenGL context attached to the window
 context = SDL2::GL::Context.create(window)
 
-glViewport(0, 0, 1024, 768)
+glViewport(0, 0, 1024, 718)
 glClearColor(0,0,0,0)
 glEnable(GL_DEPTH_TEST)
+glEnable(GL_BLEND)
+
 
 vertex_shader = Shader.new(:vertex, vertex_shader_code)
 fragment_shader = Shader.new(:fragment, fragment_shader_code)
@@ -101,8 +116,8 @@ fragment_shader = Shader.new(:fragment, fragment_shader_code)
 @program.attach_shaders(vertex_shader, fragment_shader)
 @program.link_and_use
 
-@projection_matrix = Drawing::Matrix.perspective(55.0, 1024.0, 768.0, 0.01, 40.0)
-@view_matrix = Drawing::Matrix.look_at(Vector[0.0, 3.0, 1.0], Vector[0.0, 0.0, -10.0], Vector[0.0, 1.0, 0.0])
+@projection_matrix = Drawing::Matrix.perspective(65, 1024.0, 718.0, 0.1, 10.0)
+@view_matrix = Drawing::Matrix.look_at(Vector[0.0, 0.5, 1.0], Vector[0.0, 0.0, -5.0], Vector[0.0, 1.0, 0.0])
 @model_matrix = Drawing::Matrix.identity(4)
 
 mvp_matrix = @projection_matrix * @view_matrix * @model_matrix
@@ -144,6 +159,7 @@ frames = 0.0
 
 # You can use OpenGL functions
 loop do
+  render
   while ev = SDL2::Event.poll
     if SDL2::Event::KeyDown === ev && ev.scancode == SDL2::Key::Scan::ESCAPE
       exit
@@ -151,18 +167,35 @@ loop do
     if SDL2::Event::Window === ev && ev.event == SDL2::Event::Window::RESIZED
       p 'Augh! RESIZED!'
     end
+    if SDL2::Event::MouseButtonDown === ev
+      depth_component = '    '
+      p "X #{ev.x} Y #{ev.y}"
+      glReadPixels(ev.x, 718 - ev.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, depth_component)
+      depth_component = depth_component.unpack('F')[0]
+      p depth_component
+      objX = '        '
+      objY = '        '
+      objZ = '        '
+      mv = @model_matrix * @view_matrix
+      gluUnProject(ev.x, 718 - ev.y, depth_component, mv.transpose.to_a.flatten.pack('D*'), @projection_matrix.transpose.to_a.flatten.pack('D*'), [0, 0, 1024, 718].pack('I*'), objX, objY, objZ)
+      objX = objX.unpack('D')[0]
+      objY = objY.unpack('D')[0]
+      objZ = objZ.unpack('D')[0]
+      color = Vector[objX, objY, objZ]
+      p color
+      @program.uniform_vector(color, 'cursorPoint')
+    end
     if SDL2::Event::MouseButtonUp === ev && ev.clicks > 1
       model_mode = !model_mode
       p "Model mode #{model_mode ? 'ON' : 'OFF'}"
     end
     if SDL2::Event::MouseMotion === ev && model_mode
-      @model_matrix = @model_matrix.translate(ev.xrel*0.01, -ev.yrel*0.01, 0.0)
+      @view_matrix = @view_matrix.translate(ev.xrel*0.01, -ev.yrel*0.01, 0.0)
     end
     if SDL2::Event::MouseWheel === ev && model_mode
-      @model_matrix = @model_matrix.translate(0.0, 0.0, -ev.y*0.1)
+      @view_matrix = @view_matrix.translate(0.0, 0.0, -ev.y*0.1)
     end
   end
-  render
   window.gl_swap
   frames += 1.0
   time_b = Time.now

@@ -21,9 +21,9 @@ module Drawing
       private
 
       def generate_vertex(row, column)
-        x = 0.5 * column
-        y = 0.15 * rand
-        z = -0.5 * row
+        x = 0.1 * column
+        y = 0.05 * rand
+        z = -0.1 * row
         result = Vector[x, y, z]
         @vertices << result
         result.to_a
