@@ -17,7 +17,7 @@ module Drawing
     end
 
     def data(data)
-      glBufferData(@target, data.size, data.pack, GL_STREAM_DRAW)
+      glBufferData(@target, data.size, data.pack, GL_STATIC_DRAW)
     end
   end
 end

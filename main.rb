@@ -13,21 +13,53 @@ require_relative 'drawing/drawing'
 include GLSL
 
 vertex_shader_code = %q(
-    #version 330
+    #version 330 core
     layout(location=0) in vec3 pos;
+    layout(location=1) in vec3 normal;
     uniform mat4 MVP;
+    uniform mat4 M;
+    uniform mat4 V;
+
+    out float mat_color;
     void main()
     {
-      gl_Position = MVP * vec4(pos.x, pos.y, pos.z, 1.0);
+      vec3 light_source = vec3(3.0, 10.0, 0.0);
+
+      // Vector that goes from the vertex to the camera, in camera space.
+      // In camera space, the camera is at the origin (0,0,0).
+      vec3 vertexPosition_cameraspace = ( V * M * vec4(pos, 1)).xyz;
+      vec3 EyeDirection_cameraspace = vec3(0.0,0.0,0.0) - vertexPosition_cameraspace;
+
+      // Vector that goes from the vertex to the light, in camera space. M is ommited because it's identity.
+      vec3 LightPosition_cameraspace = ( V * vec4(light_source, 1)).xyz;
+      vec3 LightDirection_cameraspace = LightPosition_cameraspace + EyeDirection_cameraspace;
+      
+      // Normal of the the vertex, in camera space
+      // Only correct if ModelMatrix does not scale the model ! Use its inverse transpose if not.
+      vec3 Normal_cameraspace = ( V * M * vec4(normal, 0)).xyz;
+
+      // Normal of the computed fragment, in camera space
+      vec3 n = normalize( Normal_cameraspace );
+      // Direction of the light (from the fragment to the light)
+      vec3 l = normalize( LightDirection_cameraspace );
+      
+      mat_color = clamp( dot(n, l), 0, 1 );
+      // mat_color = clamp( dot(normal, normalize(light_source)), 0, 1 );
+      gl_Position = MVP * vec4(pos, 1.0);
     }
   )
 
 fragment_shader_code = %q(
-    #version 330
+    #version 330 core
+    in float mat_color;
+
     out vec4 out_color;
     void main()
     {
-      out_color = vec4(1.0, 1.0, 1.0, 1.0);
+      vec4 materialColor = vec4(0.8, 0.8, 0.8, 1.0);
+      vec4 materialAmbientColor = vec4(0.1, 0.1, 0.1, 1.0) * materialColor;
+      vec4 lightColor = vec4(0.8, 0.8, 0.8, 1.0);
+      out_color = materialAmbientColor + materialColor * lightColor * mat_color;
     }
   )
 
@@ -38,37 +70,10 @@ def render
 
   mvp_matrix = @projection_matrix * @view_matrix * @model_matrix
   @program.uniform_matrix4(mvp_matrix, 'MVP')
+  @program.uniform_matrix4(@model_matrix, 'M')
+  @program.uniform_matrix4(@view_matrix, 'V')
 
-  vao = '    '
-  glGenVertexArrays(1, vao)
-  glBindVertexArray(vao.unpack('L')[0])
-
-  # data = [-1.0, -1.0, -3.0,
-  #         -1.0,  1.0, -3.0,
-  #          1.0, -1.0, -3.0,
-  #          1.0,  1.0, -3.0,
-  #          1.0, -1.0, -5.0,
-  #          1.0,  1.0, -5.0
-  #        ]
-  # inds = [0, 1, 2, 3, 4, 5]
-  landscape = Drawing::Object::Landscape.new(10)
-  data = landscape.data
-  inds = landscape.indices
-
-  vertices = Drawing::Data::Float.new(data)
-  vbo = Drawing::VBO.new(:vertex)
-  vbo.bind
-  vbo.data(vertices)
-  glEnableVertexAttribArray(0)
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0)
-
-  indices = Drawing::Data::UInt.new(inds)
-  vbo2 = Drawing::VBO.new(:index)
-  vbo2.bind
-  vbo2.data(indices)
-
-  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
-  glDrawElements(GL_TRIANGLE_STRIP, inds.size, GL_UNSIGNED_INT, 0);
+  glDrawElements(GL_TRIANGLE_STRIP, @inds.size, GL_UNSIGNED_INT, 0);
 end
 
 SDL2.init(SDL2::INIT_EVERYTHING)
@@ -88,7 +93,7 @@ context = SDL2::GL::Context.create(window)
 
 glViewport(0, 0, 1024, 768)
 glClearColor(0,0,0,0)
-# glEnable(GL_DEPTH_TEST)
+glEnable(GL_DEPTH_TEST)
 
 vertex_shader = Shader.new(:vertex, vertex_shader_code)
 fragment_shader = Shader.new(:fragment, fragment_shader_code)
@@ -97,12 +102,41 @@ fragment_shader = Shader.new(:fragment, fragment_shader_code)
 @program.attach_shaders(vertex_shader, fragment_shader)
 @program.link_and_use
 
-@projection_matrix = Drawing::Matrix.perspective(55.0, 1024.0, 768.0, 0.1, 10.0)
-@view_matrix = Drawing::Matrix.look_at(Vector[2.0, 5.0, 2.0], Vector[0.0, 0.0, -4.0], Vector[0.0, 1.0, 0.0])
+@projection_matrix = Drawing::Matrix.perspective(55.0, 1024.0, 768.0, 0.01, 40.0)
+@view_matrix = Drawing::Matrix.look_at(Vector[0.0, 3.0, 1.0], Vector[0.0, 0.0, -10.0], Vector[0.0, 1.0, 0.0])
 @model_matrix = Drawing::Matrix.identity(4)
 
 mvp_matrix = @projection_matrix * @view_matrix * @model_matrix
 @program.uniform_matrix4(mvp_matrix, 'MVP')
+
+
+  vao = '    '
+  glGenVertexArrays(1, vao)
+  glBindVertexArray(vao.unpack('L')[0])
+
+  landscape = Drawing::Object::Landscape.new(50)
+  data = landscape.data
+  data_normals = landscape.normals
+  @inds = landscape.indices
+
+  vertices = Drawing::Data::Float.new(data)
+  vbo = Drawing::VBO.new(:vertex)
+  vbo.bind
+  vbo.data(vertices)
+  glEnableVertexAttribArray(0)
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0)
+
+  normals = Drawing::Data::Float.new(data_normals)
+  vbo = Drawing::VBO.new(:vertex)
+  vbo.bind
+  vbo.data(normals)
+  glEnableVertexAttribArray(1)
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0)
+
+  indices = Drawing::Data::UInt.new(@inds)
+  vbo2 = Drawing::VBO.new(:index)
+  vbo2.bind
+  vbo2.data(indices)
 
 model_mode = false
 
