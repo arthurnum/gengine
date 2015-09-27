@@ -20,7 +20,7 @@ vertex_shader_code = %q(
     uniform mat4 M;
     uniform mat4 V;
 
-    out float mat_color;
+    out float light_K;
     void main()
     {
       vec3 light_source = vec3(3.0, 10.0, 0.0);
@@ -33,7 +33,7 @@ vertex_shader_code = %q(
       // Vector that goes from the vertex to the light, in camera space. M is ommited because it's identity.
       vec3 LightPosition_cameraspace = ( V * vec4(light_source, 1)).xyz;
       vec3 LightDirection_cameraspace = LightPosition_cameraspace + EyeDirection_cameraspace;
-      
+
       // Normal of the the vertex, in camera space
       // Only correct if ModelMatrix does not scale the model ! Use its inverse transpose if not.
       vec3 Normal_cameraspace = ( V * M * vec4(normal, 0)).xyz;
@@ -42,16 +42,15 @@ vertex_shader_code = %q(
       vec3 n = normalize( Normal_cameraspace );
       // Direction of the light (from the fragment to the light)
       vec3 l = normalize( LightDirection_cameraspace );
-      
-      mat_color = clamp( dot(n, l), 0, 1 );
-      // mat_color = clamp( dot(normal, normalize(light_source)), 0, 1 );
+
+      light_K = clamp( dot(n, l), 0, 1 );
       gl_Position = MVP * vec4(pos, 1.0);
     }
   )
 
 fragment_shader_code = %q(
     #version 330 core
-    in float mat_color;
+    in float light_K;
 
     out vec4 out_color;
     void main()
@@ -59,7 +58,7 @@ fragment_shader_code = %q(
       vec4 materialColor = vec4(0.8, 0.8, 0.8, 1.0);
       vec4 materialAmbientColor = vec4(0.1, 0.1, 0.1, 1.0) * materialColor;
       vec4 lightColor = vec4(0.8, 0.8, 0.8, 1.0);
-      out_color = materialAmbientColor + materialColor * lightColor * mat_color;
+      out_color = materialAmbientColor + materialColor * lightColor * light_K;
     }
   )
 
