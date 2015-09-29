@@ -12,6 +12,7 @@ include GLU
 
 require_relative 'glsl/glsl'
 require_relative 'drawing/drawing'
+require_relative 'calculating/calculating'
 
 include GLSL
 
@@ -123,7 +124,6 @@ fragment_shader = Shader.new(:fragment, fragment_shader_code)
 mvp_matrix = @projection_matrix * @view_matrix * @model_matrix
 @program.uniform_matrix4(mvp_matrix, 'MVP')
 
-
   vao = '    '
   glGenVertexArrays(1, vao)
   glBindVertexArray(vao.unpack('L')[0])
@@ -164,22 +164,13 @@ loop do
       p 'Augh! RESIZED!'
     end
     if SDL2::Event::MouseButtonDown === ev
-      depth_component = '    '
-      p "X #{ev.x} Y #{ev.y}"
-      glReadPixels(ev.x, 718 - ev.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, depth_component)
-      depth_component = depth_component.unpack('F')[0]
-      p depth_component
-      objX = '        '
-      objY = '        '
-      objZ = '        '
-      mv = @model_matrix * @view_matrix
-      gluUnProject(ev.x, 718 - ev.y, depth_component, mv.transpose.to_a.flatten.pack('D*'), @projection_matrix.transpose.to_a.flatten.pack('D*'), [0, 0, 1024, 718].pack('I*'), objX, objY, objZ)
-      objX = objX.unpack('D')[0]
-      objY = objY.unpack('D')[0]
-      objZ = objZ.unpack('D')[0]
-      color = Vector[objX, objY, objZ]
-      p color
-      @program.uniform_vector(color, 'cursorPoint')
+      pas = '                '
+      glGetIntegerv(GL_VIEWPORT, pas)
+      p pas.unpack('I*')
+      ray = Calculating::Ray.new
+      ray.trace(@view_matrix * @model_matrix, @projection_matrix, 1024.0, 718.0, ev.x, 718 - ev.y)
+      p ray.near
+      p ray.far
     end
     if SDL2::Event::MouseButtonUp === ev && ev.clicks > 1
       model_mode = !model_mode
