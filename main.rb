@@ -29,14 +29,14 @@ vertex_shader_code = %q(
     out vec4 cursorColor;
     out float light_K;
 
-    void ray_is_near(out bool outputValue)
+    void ray_is_near(out float outputValue)
     {
       vec3 s = rayFar - rayNear;
       vec3 mo = rayFar - pos;
       vec3 ss = cross(mo, s);
       float d = length(ss) / length(s);
 
-      outputValue = d < 0.25 ? true : false;
+      outputValue = clamp( d / 0.15, 0.0, 1.0 );
     }
 
     void main()
@@ -64,9 +64,9 @@ vertex_shader_code = %q(
       light_K = clamp( dot(n, l), 0, 1 );
       gl_Position = MVP * vec4(pos, 1.0);
 
-      bool a = false;
+      float a = 0.0;
       ray_is_near(a);
-      cursorColor = a ? vec4(1.0, 0.0, 0.0, 1.0) : vec4(0.8, 0.8, 0.8, 1.0);
+      cursorColor = mix(vec4(1.0, 0.0, 0.0, 1.0), vec4(0.8, 0.8, 0.8, 1.0), a);
     }
   )
 
@@ -136,7 +136,7 @@ mvp_matrix = @projection_matrix * @view_matrix * @model_matrix
   glGenVertexArrays(1, vao)
   glBindVertexArray(vao.unpack('L')[0])
 
-  landscape = Drawing::Object::Landscape.new(100)
+  landscape = Drawing::Object::Landscape.new(50)
 
   vbo = Drawing::VBO.new(:vertex)
   vbo.bind
