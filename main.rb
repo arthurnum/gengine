@@ -12,6 +12,7 @@ include GLU
 
 require_relative 'glsl/glsl'
 require_relative 'drawing/drawing'
+require_relative 'calculating/calculating'
 
 include GLSL
 
@@ -22,10 +23,22 @@ vertex_shader_code = %q(
     uniform mat4 MVP;
     uniform mat4 M;
     uniform mat4 V;
-    uniform vec3 cursorPoint;
+    uniform vec3 rayNear;
+    uniform vec3 rayFar;
 
     out vec4 cursorColor;
     out float light_K;
+
+    void ray_is_near(out float outputValue)
+    {
+      vec3 s = rayFar - rayNear;
+      vec3 mo = rayFar - pos;
+      vec3 ss = cross(mo, s);
+      float d = length(ss) / length(s);
+
+      outputValue = clamp( d / 0.15, 0.0, 1.0 );
+    }
+
     void main()
     {
       vec3 light_source = vec3(3.0, 10.0, 0.0);
@@ -51,10 +64,9 @@ vertex_shader_code = %q(
       light_K = clamp( dot(n, l), 0, 1 );
       gl_Position = MVP * vec4(pos, 1.0);
 
-      vec3 distance_vector = pos.xyz - cursorPoint;
-      float distance = length(distance_vector);
-      float r = 1.0 * (0.25 - distance);
-      cursorColor = r > 0 ? vec4(1.0, 0.0, 0.0, 1.0) : vec4(0.8, 0.8, 0.8, 1.0);
+      float a = 0.0;
+      ray_is_near(a);
+      cursorColor = mix(vec4(1.0, 0.0, 0.0, 1.0), vec4(0.8, 0.8, 0.8, 1.0), a);
     }
   )
 
@@ -88,8 +100,6 @@ end
 
 SDL2.init(SDL2::INIT_EVERYTHING)
 SDL2::GL.set_attribute(SDL2::GL::DOUBLEBUFFER, 1)
-SDL2::GL.set_attribute(SDL2::GL::DEPTH_SIZE, 24)
-SDL2::GL.set_attribute(SDL2::GL::STENCIL_SIZE, 8)
 SDL2::GL.set_attribute(SDL2::GL::CONTEXT_MAJOR_VERSION, 3)
 SDL2::GL.set_attribute(SDL2::GL::CONTEXT_MINOR_VERSION, 3)
 SDL2::GL.set_attribute(SDL2::GL::CONTEXT_PROFILE_MASK, SDL2::GL::CONTEXT_PROFILE_CORE)
@@ -106,7 +116,6 @@ context = SDL2::GL::Context.create(window)
 glViewport(0, 0, 1024, 718)
 glClearColor(0,0,0,0)
 glEnable(GL_DEPTH_TEST)
-glEnable(GL_BLEND)
 
 
 vertex_shader = Shader.new(:vertex, vertex_shader_code)
@@ -123,12 +132,11 @@ fragment_shader = Shader.new(:fragment, fragment_shader_code)
 mvp_matrix = @projection_matrix * @view_matrix * @model_matrix
 @program.uniform_matrix4(mvp_matrix, 'MVP')
 
-
   vao = '    '
   glGenVertexArrays(1, vao)
   glBindVertexArray(vao.unpack('L')[0])
 
-  landscape = Drawing::Object::Landscape.new(100)
+  landscape = Drawing::Object::Landscape.new(50)
 
   vbo = Drawing::VBO.new(:vertex)
   vbo.bind
@@ -164,22 +172,10 @@ loop do
       p 'Augh! RESIZED!'
     end
     if SDL2::Event::MouseButtonDown === ev
-      depth_component = '    '
-      p "X #{ev.x} Y #{ev.y}"
-      glReadPixels(ev.x, 718 - ev.y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, depth_component)
-      depth_component = depth_component.unpack('F')[0]
-      p depth_component
-      objX = '        '
-      objY = '        '
-      objZ = '        '
-      mv = @model_matrix * @view_matrix
-      gluUnProject(ev.x, 718 - ev.y, depth_component, mv.transpose.to_a.flatten.pack('D*'), @projection_matrix.transpose.to_a.flatten.pack('D*'), [0, 0, 1024, 718].pack('I*'), objX, objY, objZ)
-      objX = objX.unpack('D')[0]
-      objY = objY.unpack('D')[0]
-      objZ = objZ.unpack('D')[0]
-      color = Vector[objX, objY, objZ]
-      p color
-      @program.uniform_vector(color, 'cursorPoint')
+      ray = Calculating::Ray.new
+      ray.trace(@view_matrix * @model_matrix, @projection_matrix, 1024.0, 718.0, ev.x, 718 - ev.y)
+      @program.uniform_vector(ray.near, 'rayNear')
+      @program.uniform_vector(ray.far, 'rayFar')
     end
     if SDL2::Event::MouseButtonUp === ev && ev.clicks > 1
       model_mode = !model_mode
