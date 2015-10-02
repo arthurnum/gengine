@@ -1,7 +1,7 @@
 module Drawing
   module Object
     class Landscape
-      attr_reader :vertices_data, :normals_data, :indices_data
+      attr_reader :vertices_data, :normals_data, :indices_data, :faces
 
       def initialize(dim)
         ###
@@ -67,6 +67,12 @@ module Drawing
         Data::Float.new(data)
       end
 
+      def colors_data
+        data = []
+        @vertices.each { |v| data.concat v.color.to_a }
+        Data::Float.new(data)
+      end
+
       def indices_data
         Data::UInt.new(@indices)
       end
@@ -78,9 +84,9 @@ module Drawing
       private
 
       def generate_vertex(row, column)
-        x = 0.1 * column
-        y = 0.05 * rand
-        z = 0.1 * row
+        x = 0.2 * column
+        y = 0.1 * rand
+        z = 0.2 * row
         Vertex.new(x, y, z)
       end
 

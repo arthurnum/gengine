@@ -43,8 +43,10 @@ glClearColor(0,0,0,0)
 glEnable(GL_DEPTH_TEST)
 
 
-vertex_shader = Shader.new(:vertex, Collection::VERTEX_SHADER_S1)
-fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S1)
+# vertex_shader = Shader.new(:vertex, Collection::VERTEX_SHADER_S1)
+# fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S1)
+vertex_shader = Shader.new(:vertex, Collection::VERTEX_SHADER_S2)
+fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S2)
 
 @program = Program.new
 @program.attach_shaders(vertex_shader, fragment_shader)
@@ -71,6 +73,11 @@ fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S1)
   vbo.data(landscape.normals_data)
   vao.set_array_pointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0)
 
+  vbo = Drawing::VBO.new(:vertex)
+  vbo.bind
+  vbo.data(landscape.colors_data)
+  vao.set_array_pointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0)
+
   vbo2 = Drawing::VBO.new(:index)
   vbo2.bind
   vbo2.data(landscape.indices_data)
@@ -93,8 +100,13 @@ end
 h_mouse_down = lambda do |win, ev|
   ray = Calculating::Ray.new
   ray.trace(@world.matrix.world, window.width, window.height, ev.x, window.height - ev.y)
-  @program.uniform_vector(ray.near, 'rayNear')
-  @program.uniform_vector(ray.far, 'rayFar')
+  ray.intersection(landscape.faces)
+  # @program.uniform_vector(ray.near, 'rayNear')
+  # @program.uniform_vector(ray.far, 'rayFar')
+  vbo = Drawing::VBO.new(:vertex)
+  vbo.bind
+  vbo.data(landscape.colors_data)
+  vao.set_array_pointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0)
 end
 
 h_mouse_up = lambda do |win, ev|

@@ -15,7 +15,28 @@ module Drawing
       result.normalize
     end
 
-    private
+    def inspect
+      "#{v1.vector}\n#{v2.vector}\n#{v3.vector}"
+    end
+
+    def has?(point)
+      a = point - v1.vector
+      b = point - v2.vector
+      e1 = a.cross(b).dot(normal)
+        a = point - v2.vector
+        b = point - v3.vector
+        e2 = a.cross(b).dot(normal)
+          a = point - v3.vector
+          b = point - v1.vector
+          e3 = a.cross(b).dot(normal)
+      return true if (e1 > 0) && (e2 > 0) && (e3 > 0)
+      return true if (e1 < 0) && (e2 < 0) && (e3 < 0)
+      return false
+    end
+
+    def color=(vcolor)
+      v1.color = v2.color = v3.color = vcolor
+    end
 
     def v1
       @vertices[0]
