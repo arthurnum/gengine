@@ -85,15 +85,14 @@ fragment_shader_code = %q(
     }
   )
 
-@projection_matrix = @view_matrix = @model_matrix = Drawing::Matrix.identity(4)
+@world = Drawing::World.new
 
 def render
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-  mvp_matrix = @projection_matrix * @view_matrix * @model_matrix
-  @program.uniform_matrix4(mvp_matrix, 'MVP')
-  @program.uniform_matrix4(@model_matrix, 'M')
-  @program.uniform_matrix4(@view_matrix, 'V')
+  @program.uniform_matrix4(@world.matrix.world, 'MVP')
+  @program.uniform_matrix4(@world.matrix.model, 'M')
+  @program.uniform_matrix4(@world.matrix.view, 'V')
 
   glDrawElements(GL_TRIANGLE_STRIP, @count, GL_UNSIGNED_INT, 0);
 end
@@ -113,7 +112,7 @@ window = SDL2::Window.create('GENGINE', 0, 0, 1024, 768,
 # Create a OpenGL context attached to the window
 context = SDL2::GL::Context.create(window)
 
-glViewport(0, 0, 1024, 718)
+glViewport(0, 0, 1024, 768)
 glClearColor(0,0,0,0)
 glEnable(GL_DEPTH_TEST)
 
@@ -125,12 +124,11 @@ fragment_shader = Shader.new(:fragment, fragment_shader_code)
 @program.attach_shaders(vertex_shader, fragment_shader)
 @program.link_and_use
 
-@projection_matrix = Drawing::Matrix.perspective(65, 1024.0, 718.0, 0.1, 10.0)
-@view_matrix = Drawing::Matrix.look_at(Vector[0.0, 0.5, 1.0], Vector[0.0, 0.0, -5.0], Vector[0.0, 1.0, 0.0])
-@model_matrix = Drawing::Matrix.identity(4)
+@world.matrix.projection = Drawing::Matrix.perspective(65, 1024.0, 768.0, 0.1, 10.0)
+@world.matrix.view = Drawing::Matrix.look_at(Vector[0.0, 0.5, 1.0], Vector[0.0, 0.0, -5.0], Vector[0.0, 1.0, 0.0])
+@world.matrix.model = Drawing::Matrix.identity(4)
 
-mvp_matrix = @projection_matrix * @view_matrix * @model_matrix
-@program.uniform_matrix4(mvp_matrix, 'MVP')
+@program.uniform_matrix4(@world.matrix.world, 'MVP')
 
   vao = '    '
   glGenVertexArrays(1, vao)
@@ -173,7 +171,7 @@ loop do
     end
     if SDL2::Event::MouseButtonDown === ev
       ray = Calculating::Ray.new
-      ray.trace(@view_matrix * @model_matrix, @projection_matrix, 1024.0, 718.0, ev.x, 718 - ev.y)
+      ray.trace(@world.matrix.world, 1024.0, 768.0, ev.x, 768 - ev.y)
       @program.uniform_vector(ray.near, 'rayNear')
       @program.uniform_vector(ray.far, 'rayFar')
     end
@@ -182,10 +180,10 @@ loop do
       p "Model mode #{model_mode ? 'ON' : 'OFF'}"
     end
     if SDL2::Event::MouseMotion === ev && model_mode
-      @view_matrix = @view_matrix.translate(ev.xrel*0.01, -ev.yrel*0.01, 0.0)
+      @world.matrix.view = @world.matrix.view.translate(ev.xrel*0.01, -ev.yrel*0.01, 0.0)
     end
     if SDL2::Event::MouseWheel === ev && model_mode
-      @view_matrix = @view_matrix.translate(0.0, 0.0, -ev.y*0.1)
+      @world.matrix.view = @world.matrix.view.translate(0.0, 0.0, -ev.y*0.1)
     end
   end
   window.gl_swap
