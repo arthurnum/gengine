@@ -13,6 +13,7 @@ include GLU
 require_relative 'glsl/glsl'
 require_relative 'drawing/drawing'
 require_relative 'calculating/calculating'
+require_relative 'context/context'
 
 include GLSL
 
@@ -105,14 +106,12 @@ SDL2::GL.set_attribute(SDL2::GL::CONTEXT_PROFILE_MASK, SDL2::GL::CONTEXT_PROFILE
 
 
 # You need to create a window with `OPENGL' flag
-window = SDL2::Window.create('GENGINE', 0, 0, 1024, 768,
-                             (SDL2::Window::Flags::OPENGL | SDL2::Window::Flags::RESIZABLE))
-
+window = Context::Window.new(1024.0, 768.0)
 
 # Create a OpenGL context attached to the window
-context = SDL2::GL::Context.create(window)
+context = SDL2::GL::Context.create(window.sdl_window)
 
-glViewport(0, 0, 1024, 768)
+glViewport(0, 0, window.width, window.height)
 glClearColor(0,0,0,0)
 glEnable(GL_DEPTH_TEST)
 
@@ -124,7 +123,7 @@ fragment_shader = Shader.new(:fragment, fragment_shader_code)
 @program.attach_shaders(vertex_shader, fragment_shader)
 @program.link_and_use
 
-@world.matrix.projection = Drawing::Matrix.perspective(65, 1024.0, 768.0, 0.1, 10.0)
+@world.matrix.projection = Drawing::Matrix.perspective(65, window.width, window.height, 0.1, 10.0)
 @world.matrix.view = Drawing::Matrix.look_at(Vector[0.0, 0.5, 1.0], Vector[0.0, 0.0, -5.0], Vector[0.0, 1.0, 0.0])
 @world.matrix.model = Drawing::Matrix.identity(4)
 
@@ -159,34 +158,52 @@ model_mode = false
 time_a = Time.now
 frames = 0.0
 
+h_escape = lambda do |win, ev|
+  win.exit if ev.scancode == SDL2::Key::Scan::ESCAPE
+end
+
+h_resized = lambda do |win, ev|
+  p 'Augh! RESIZED!'
+end
+
+h_mouse_down = lambda do |win, ev|
+  ray = Calculating::Ray.new
+  ray.trace(@world.matrix.world, window.width, window.height, ev.x, window.height - ev.y)
+  @program.uniform_vector(ray.near, 'rayNear')
+  @program.uniform_vector(ray.far, 'rayFar')
+end
+
+h_mouse_up = lambda do |win, ev|
+  if ev.clicks > 1
+    model_mode = !model_mode
+    p "Model mode #{model_mode ? 'ON' : 'OFF'}"
+  end
+end
+
+h_mouse_motion = lambda do |win, ev|
+  @world.matrix.view = @world.matrix.view.translate(ev.xrel*0.01, -ev.yrel*0.01, 0.0) if model_mode
+end
+
+h_mouse_wheel = lambda do |win, ev|
+  @world.matrix.view = @world.matrix.view.translate(0.0, 0.0, -ev.y*0.1) if model_mode
+end
+
+window.register_event_handler(:key_down, h_escape)
+window.register_event_handler(:window, h_resized)
+window.register_event_handler(:mouse_button_down, h_mouse_down)
+window.register_event_handler(:mouse_button_up, h_mouse_up)
+window.register_event_handler(:mouse_motion, h_mouse_motion)
+window.register_event_handler(:mouse_wheel, h_mouse_wheel)
+
 # You can use OpenGL functions
 loop do
   render
-  while ev = SDL2::Event.poll
-    if SDL2::Event::KeyDown === ev && ev.scancode == SDL2::Key::Scan::ESCAPE
-      exit
-    end
-    if SDL2::Event::Window === ev && ev.event == SDL2::Event::Window::RESIZED
-      p 'Augh! RESIZED!'
-    end
-    if SDL2::Event::MouseButtonDown === ev
-      ray = Calculating::Ray.new
-      ray.trace(@world.matrix.world, 1024.0, 768.0, ev.x, 768 - ev.y)
-      @program.uniform_vector(ray.near, 'rayNear')
-      @program.uniform_vector(ray.far, 'rayFar')
-    end
-    if SDL2::Event::MouseButtonUp === ev && ev.clicks > 1
-      model_mode = !model_mode
-      p "Model mode #{model_mode ? 'ON' : 'OFF'}"
-    end
-    if SDL2::Event::MouseMotion === ev && model_mode
-      @world.matrix.view = @world.matrix.view.translate(ev.xrel*0.01, -ev.yrel*0.01, 0.0)
-    end
-    if SDL2::Event::MouseWheel === ev && model_mode
-      @world.matrix.view = @world.matrix.view.translate(0.0, 0.0, -ev.y*0.1)
-    end
-  end
+
+  window.events_poll
+  exit if window.exit?
+
   window.gl_swap
+
   frames += 1.0
   time_b = Time.now
   delta = time_b - time_a
