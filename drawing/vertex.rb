@@ -12,5 +12,18 @@ module Drawing
       @faces.each { |f| result += f.normal }
       result.normalize
     end
+
+    def x
+      @vector[0]
+    end
+
+    def y
+      @vector[1]
+    end
+
+    def z
+      @vector[2]
+    end
+
   end
 end
