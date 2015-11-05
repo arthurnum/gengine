@@ -129,23 +129,20 @@ fragment_shader = Shader.new(:fragment, fragment_shader_code)
 
 @program.uniform_matrix4(@world.matrix.world, 'MVP')
 
-  vao = '    '
-  glGenVertexArrays(1, vao)
-  glBindVertexArray(vao.unpack('L')[0])
-
   landscape = Drawing::Object::Landscape.new(50)
+
+  vao = Drawing::VAO.new
+  vao.bind
 
   vbo = Drawing::VBO.new(:vertex)
   vbo.bind
   vbo.data(landscape.vertices_data)
-  glEnableVertexAttribArray(0)
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0)
+  vao.set_array_pointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0)
 
   vbo = Drawing::VBO.new(:vertex)
   vbo.bind
   vbo.data(landscape.normals_data)
-  glEnableVertexAttribArray(1)
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0)
+  vao.set_array_pointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0)
 
   vbo2 = Drawing::VBO.new(:index)
   vbo2.bind
