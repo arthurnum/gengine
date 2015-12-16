@@ -124,7 +124,7 @@ fragment_shader = Shader.new(:fragment, fragment_shader_code)
 @program.link_and_use
 
 @world.matrix.projection = Drawing::Matrix.perspective(65, window.width, window.height, 0.1, 10.0)
-@world.matrix.view = Drawing::Matrix.look_at(Vector[0.0, 0.5, 1.0], Vector[0.0, 0.0, -5.0], Vector[0.0, 1.0, 0.0])
+@world.matrix.view = Drawing::Matrix.look_at(Vector[0.0, 0.5, -1.0], Vector[0.0, 0.0, 5.0], Vector[0.0, 1.0, 0.0])
 @world.matrix.model = Drawing::Matrix.identity(4)
 
 @program.uniform_matrix4(@world.matrix.world, 'MVP')

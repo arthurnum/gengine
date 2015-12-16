@@ -80,7 +80,7 @@ module Drawing
       def generate_vertex(row, column)
         x = 0.1 * column
         y = 0.05 * rand
-        z = -0.1 * row
+        z = 0.1 * row
         Vertex.new(x, y, z)
       end
 
