@@ -1,14 +1,10 @@
 require 'sdl2'
 require 'opengl'
-require 'glu'
 
 require 'pry'
 
-
 OpenGL.load_lib
-GLU.load_lib
 include OpenGL
-include GLU
 
 require_relative 'glsl/glsl'
 require_relative 'drawing/drawing'
