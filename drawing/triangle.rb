@@ -9,10 +9,7 @@ module Drawing
     end
 
     def normal
-      t1 = v2.vector - v1.vector
-      t2 = v3.vector - v1.vector
-      result = t1.cross_product t2
-      result.normalize
+      @normal ||= calculate_normal
     end
 
     def inspect
@@ -48,6 +45,15 @@ module Drawing
 
     def v3
       @vertices[2]
+    end
+
+    private
+
+    def calculate_normal
+      t1 = v2.vector - v1.vector
+      t2 = v3.vector - v1.vector
+      result = t1.cross_product t2
+      result.normalize
     end
   end
 end
