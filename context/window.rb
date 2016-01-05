@@ -1,8 +1,8 @@
 module Context
   class Window
-    class Event
-      WINDOW_MODE = SDL2::Window::Flags::OPENGL | SDL2::Window::Flags::RESIZABLE
+    WINDOW_MODE = SDL2::Window::Flags::OPENGL | SDL2::Window::Flags::RESIZABLE
 
+    class Event
       attr_accessor :handlers
 
       def initialize
