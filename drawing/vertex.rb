@@ -14,6 +14,14 @@ module Drawing
       result.normalize
     end
 
+    def color
+      focus ? Vector[0.9, 0.1, 0.1] : Vector[0.8, 0.8, 0.8]
+    end
+
+    def focus
+      faces.map(&:focus).include? true
+    end
+
     def x
       @vector[0]
     end

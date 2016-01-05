@@ -101,8 +101,6 @@ h_mouse_down = lambda do |win, ev|
   ray = Calculating::Ray.new
   ray.trace(@world.matrix.world, window.width, window.height, ev.x, window.height - ev.y)
   ray.intersection(landscape.faces)
-  # @program.uniform_vector(ray.near, 'rayNear')
-  # @program.uniform_vector(ray.far, 'rayFar')
   vbo = Drawing::VBO.new(:vertex)
   vbo.bind
   vbo.data(landscape.colors_data)

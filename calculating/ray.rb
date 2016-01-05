@@ -27,7 +27,6 @@ module Calculating
     # t = (face_d - outbound) / k
     ###
     def intersection(faces)
-      faces.each { |tr| tr.color = Vector[0.8, 0.8, 0.8] }
       faces.each do |tr|
         face_d = tr.normal[0] * tr.v1.x + tr.normal[1] * tr.v1.y + tr.normal[2] * tr.v1.z
         outbound = tr.normal[0] * far[0] + tr.normal[1] * far[1] + tr.normal[2] * far[2]
@@ -37,9 +36,7 @@ module Calculating
         y = t * @direct[1] + @far[1]
         z = t * @direct[2] + @far[2]
         point = Vector[x, y, z]
-        if tr.has?(point)
-          tr.color = tr.has?(point) ? Vector[1.0, 0.0, 0.0] : Vector[0.8, 0.8, 0.8]
-        end
+        tr.focus = tr.has?(point)
       end
     end
 
