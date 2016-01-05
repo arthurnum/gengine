@@ -17,18 +17,24 @@ module Drawing
     end
 
     def has?(point)
-      a = point - v1.vector
-      b = point - v2.vector
-      e1 = a.cross(b).dot(normal)
-        a = point - v2.vector
-        b = point - v3.vector
-        e2 = a.cross(b).dot(normal)
-          a = point - v3.vector
-          b = point - v1.vector
-          e3 = a.cross(b).dot(normal)
-      return true if (e1 > 0) && (e2 > 0) && (e3 > 0)
-      return true if (e1 < 0) && (e2 < 0) && (e3 < 0)
-      return false
+      # a = point - v1.vector
+      # b = point - v2.vector
+      # e1 = a.cross(b).dot(normal)
+      #   a = point - v2.vector
+      #   b = point - v3.vector
+      #   e2 = a.cross(b).dot(normal)
+      #     a = point - v3.vector
+      #     b = point - v1.vector
+      #     e3 = a.cross(b).dot(normal)
+      # return true if (e1 > 0) && (e2 > 0) && (e3 > 0)
+      # return true if (e1 < 0) && (e2 < 0) && (e3 < 0)
+      # return false
+      oa = v1.vector - point
+      ob = v2.vector - point
+      oc = v3.vector - point
+      ab = v2.vector - v1.vector
+      ac = v3.vector - v1.vector
+      oa.cross(ob).r + ob.cross(oc).r + oc.cross(oa).r <= ab.cross(ac).r
     end
 
     def color=(vcolor)
