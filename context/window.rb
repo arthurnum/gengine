@@ -1,6 +1,8 @@
 module Context
   class Window
     class Event
+      WINDOW_MODE = SDL2::Window::Flags::OPENGL | SDL2::Window::Flags::RESIZABLE
+
       attr_accessor :handlers
 
       def initialize
@@ -12,12 +14,11 @@ module Context
       end
     end
 
-    def initialize(w, h)
+    def initialize(w, h, window = true)
       @width = w
       @height = h
 
-      @sdl_window = SDL2::Window.create('GENGINE', 0, 0, w, h,
-                                        (SDL2::Window::Flags::OPENGL | SDL2::Window::Flags::RESIZABLE))
+      @sdl_window = SDL2::Window.create('GENGINE', 0, 0, w, h, WINDOW_MODE) if window
 
       @events = {
         key_down: Event.new,
