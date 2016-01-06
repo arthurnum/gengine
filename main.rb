@@ -45,8 +45,8 @@ glEnable(GL_DEPTH_TEST)
 
 # vertex_shader = Shader.new(:vertex, Collection::VERTEX_SHADER_S1)
 # fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S1)
-vertex_shader = Shader.new(:vertex, Collection::VERTEX_SHADER_S2)
-fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S2)
+vertex_shader = Shader.new(:vertex, Collection::VERTEX_SHADER_S3)
+fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S3)
 
 @program = Program.new
 @program.attach_shaders(vertex_shader, fragment_shader)

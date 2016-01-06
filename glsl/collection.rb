@@ -123,5 +123,54 @@ module GLSL
           out_color = materialAmbientColor + matColor * lightColor * light_K;
         }
       )
+
+    VERTEX_SHADER_S3 = %q(
+        #version 330 core
+        layout(location=0) in vec3 pos;
+        layout(location=1) in vec3 normal;
+        layout(location=2) in vec3 color;
+        uniform mat4 MVP;
+        uniform mat4 M;
+        uniform mat4 V;
+
+        out vec3 fragVertex;
+        out vec3 fragNormal;
+        out vec3 fragColor;
+        out mat4 model;
+        out mat4 view;
+
+        void main()
+        {
+          fragVertex = pos;
+          fragNormal = normal;
+          fragColor = color;
+          model = M;
+          view = V;
+
+          gl_Position = MVP * vec4(pos, 1.0);
+        }
+      )
+
+      FRAGMENT_SHADER_S3 = %q(
+          #version 330 core
+
+          in vec3 fragVertex;
+          in vec3 fragNormal;
+          in vec3 fragColor;
+          in mat4 model;
+          in mat4 view;
+          out vec3 out_color;
+
+          void main()
+          {
+            vec3 lightNormal = vec3(0.0, 1.0, 0.0);
+            float angle = dot(fragNormal, lightNormal);
+            float est = angle / (length(fragNormal) * length(lightNormal));
+
+            vec3 materialAmbientColor = fragColor;
+            vec3 lightColor = vec3(1.0, 1.0, 1.0);
+            out_color = materialAmbientColor * lightColor * est;
+          }
+        )
   end
 end
