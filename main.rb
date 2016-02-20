@@ -50,7 +50,7 @@ fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S3)
 @program.link_and_use
 
 @world.matrix.projection = Drawing::Matrix.perspective(65, window.width, window.height, 0.1, 1000.0)
-@world.matrix.view = Drawing::Matrix.look_at(Vector[0.0, 5.0, -2.0], Vector[0.0, 0.0, 10.0], Vector[0.0, 1.0, 0.0])
+@world.matrix.view = Drawing::Matrix.look_at(Vector[0.0, 15.0, -2.0], Vector[0.0, 0.0, 50.0], Vector[0.0, 1.0, 0.0])
 @world.matrix.model = Drawing::Matrix.identity(4)
 
 @program.uniform_matrix4(@world.matrix.world, 'MVP')
@@ -79,6 +79,8 @@ fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S3)
 
 model_mode = false
 
+focus_array = []
+
 time_a = Time.now
 frames = 0.0
 
@@ -88,14 +90,15 @@ end
 
 h_edit_face = lambda do |win, ev|
   if ev.scancode == SDL2::Key::Scan::UP
-    landscape.faces.each do |face|
-      if face.focus
-        face.v1.vector += Vector[0.0, 0.1, 0.0]
-        face.v2.vector += Vector[0.0, 0.1, 0.0]
-        face.v3.vector += Vector[0.0, 0.1, 0.0]
-        face.v1.faces.each { |f| f.reset_normal }
-        face.v2.faces.each { |f| f.reset_normal }
-        face.v3.faces.each { |f| f.reset_normal }
+    focus_array.each do |face|
+      center = face.v1
+      landscape.vertices.each do |vert|
+        dt = Math.sqrt( (vert.x - center.x)**2 + (vert.z - center.z)**2 )
+        shift = 0.05 * ( (20.0 - dt) / 20.0 )
+        if shift > 0.0
+          vert.vector += Vector[0.0, shift, 0.0]
+          vert.faces.each { |f| f.reset_normal }
+        end
       end
     end
   end
@@ -111,7 +114,7 @@ end
 h_mouse_down = lambda do |win, ev|
   ray = Calculating::Ray.new
   ray.trace(@world.matrix.world, window.width, window.height, ev.x, window.height - ev.y)
-  ray.intersection(landscape.faces)
+  focus_array = ray.intersection(landscape.faces)
   vbo = Drawing::VBO.new(:vertex)
   vbo.bind
   vbo.data(landscape.colors_data)

@@ -1,7 +1,8 @@
 module Drawing
   module Object
     class Landscape
-      attr_reader :vertices_data, :normals_data, :indices_data, :faces
+      attr_reader :vertices_data, :normals_data, :indices_data, :faces,
+                  :vertices
 
       def initialize(dim)
         ###
