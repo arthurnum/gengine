@@ -60,15 +60,11 @@ fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S3)
   vao = Drawing::VAO.new
   vao.bind
 
-  vbo = Drawing::VBO.new(:vertex)
-  vbo.bind
-  vbo.data(landscape.vertices_data)
-  vao.set_array_pointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0)
-
-  vbo = Drawing::VBO.new(:vertex)
-  vbo.bind
-  vbo.data(landscape.normals_data)
-  vao.set_array_pointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0)
+  supervbo = Drawing::VBO.new(:vertex)
+  supervbo.bind
+  supervbo.data(landscape.vn_data)
+  vao.set_array_pointer(0, 3, GL_FLOAT, GL_FALSE, 24, 0)
+  vao.set_array_pointer(1, 3, GL_FLOAT, GL_FALSE, 24, 12)
 
   vbo = Drawing::VBO.new(:vertex)
   vbo.bind
@@ -104,15 +100,8 @@ h_edit_face = lambda do |win, ev|
     end
   end
 
-  vbo = Drawing::VBO.new(:vertex)
-  vbo.bind
-  vbo.data(landscape.vertices_data)
-  vao.set_array_pointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0)
-
-  vbo = Drawing::VBO.new(:vertex)
-  vbo.bind
-  vbo.data(landscape.normals_data)
-  vao.set_array_pointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0)
+  supervbo.bind
+  supervbo.data(landscape.vn_data)
 end
 
 h_resized = lambda do |win, ev|

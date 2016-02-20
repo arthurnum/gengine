@@ -67,6 +67,15 @@ module Drawing
         Data::Float.new(data)
       end
 
+      def vn_data
+        data = []
+        @vertices.each do |vert|
+          data.concat vert.vector.to_a
+          data.concat vert.normal.to_a
+        end
+        Data::Float.new(data)
+      end
+
       def colors_data
         data = []
         @vertices.each { |v| data.concat v.color.to_a }
