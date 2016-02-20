@@ -4,7 +4,7 @@ module Drawing
 
     def initialize(x, y, z)
       @vector = Vector[x, y, z]
-      @color = Vector[0.8, 0.8, 0.8]
+      @color = Vector[1.0, 1.0, 1.0]
       @faces = []
     end
 
@@ -15,7 +15,7 @@ module Drawing
     end
 
     def color
-      focus ? Vector[0.9, 0.1, 0.1] : Vector[0.8, 0.8, 0.8]
+      focus ? Vector[0.9, 0.1, 0.1] : Vector[1.0, 1.0, 1.0]
     end
 
     def focus

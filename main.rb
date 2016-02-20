@@ -42,9 +42,6 @@ glViewport(0, 0, window.width, window.height)
 glClearColor(0,0,0,0)
 glEnable(GL_DEPTH_TEST)
 
-
-# vertex_shader = Shader.new(:vertex, Collection::VERTEX_SHADER_S1)
-# fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S1)
 vertex_shader = Shader.new(:vertex, Collection::VERTEX_SHADER_S3)
 fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S3)
 
@@ -52,8 +49,8 @@ fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S3)
 @program.attach_shaders(vertex_shader, fragment_shader)
 @program.link_and_use
 
-@world.matrix.projection = Drawing::Matrix.perspective(65, window.width, window.height, 0.1, 10.0)
-@world.matrix.view = Drawing::Matrix.look_at(Vector[0.0, 5.5, -1.0], Vector[0.0, 0.0, 2.0], Vector[0.0, 1.0, 0.0])
+@world.matrix.projection = Drawing::Matrix.perspective(65, window.width, window.height, 0.1, 1000.0)
+@world.matrix.view = Drawing::Matrix.look_at(Vector[0.0, 5.0, -2.0], Vector[0.0, 0.0, 10.0], Vector[0.0, 1.0, 0.0])
 @world.matrix.model = Drawing::Matrix.identity(4)
 
 @program.uniform_matrix4(@world.matrix.world, 'MVP')
@@ -93,6 +90,31 @@ h_escape = lambda do |win, ev|
   win.exit if ev.scancode == SDL2::Key::Scan::ESCAPE
 end
 
+h_edit_face = lambda do |win, ev|
+  if ev.scancode == SDL2::Key::Scan::UP
+    landscape.faces.each do |face|
+      if face.focus
+        face.v1.vector += Vector[0.0, 0.1, 0.0]
+        face.v2.vector += Vector[0.0, 0.1, 0.0]
+        face.v3.vector += Vector[0.0, 0.1, 0.0]
+        face.v1.faces.each { |f| f.reset_normal }
+        face.v2.faces.each { |f| f.reset_normal }
+        face.v3.faces.each { |f| f.reset_normal }
+      end
+    end
+  end
+
+  vbo = Drawing::VBO.new(:vertex)
+  vbo.bind
+  vbo.data(landscape.vertices_data)
+  vao.set_array_pointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0)
+
+  vbo = Drawing::VBO.new(:vertex)
+  vbo.bind
+  vbo.data(landscape.normals_data)
+  vao.set_array_pointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0)
+end
+
 h_resized = lambda do |win, ev|
   p 'Augh! RESIZED!'
 end
@@ -123,6 +145,7 @@ h_mouse_wheel = lambda do |win, ev|
 end
 
 window.register_event_handler(:key_down, h_escape)
+window.register_event_handler(:key_down, h_edit_face)
 window.register_event_handler(:window, h_resized)
 window.register_event_handler(:mouse_button_down, h_mouse_down)
 window.register_event_handler(:mouse_button_up, h_mouse_up)

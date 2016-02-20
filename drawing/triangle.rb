@@ -13,6 +13,10 @@ module Drawing
       @normal ||= calculate_normal
     end
 
+    def reset_normal
+      @normal = calculate_normal
+    end
+
     def inspect
       "#{v1.vector}\n#{v2.vector}\n#{v3.vector}"
     end

@@ -63,7 +63,7 @@ module Drawing
 
       def normals_data
         data = []
-        @normals.each { |n| data.concat n.to_a }
+        @vertices.each { |n| data.concat n.normal.to_a }
         Data::Float.new(data)
       end
 
@@ -84,9 +84,9 @@ module Drawing
       private
 
       def generate_vertex(row, column)
-        x = 0.4 * column
-        y = 0.2 * rand
-        z = 0.4 * row
+        x = 4.0 * column
+        y = 1.0 * rand
+        z = 4.0 * row
         Vertex.new(x, y, z)
       end
 
