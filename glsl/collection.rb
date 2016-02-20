@@ -163,13 +163,12 @@ module GLSL
 
           void main()
           {
-            vec3 lightNormal = vec3(0.0, 1.0, 0.0);
+            vec3 lightNormal = normalize(vec3(0.0, 1.0, 1.0));
             float angle = dot(fragNormal, lightNormal);
-            float est = angle / (length(fragNormal) * length(lightNormal));
 
             vec3 materialAmbientColor = fragColor;
             vec3 lightColor = vec3(1.0, 1.0, 1.0);
-            out_color = materialAmbientColor * lightColor * est;
+            out_color = materialAmbientColor * lightColor * angle;
           }
         )
   end
