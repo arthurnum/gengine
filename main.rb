@@ -31,7 +31,6 @@ SDL2::GL.set_attribute(SDL2::GL::CONTEXT_MAJOR_VERSION, 3)
 SDL2::GL.set_attribute(SDL2::GL::CONTEXT_MINOR_VERSION, 3)
 SDL2::GL.set_attribute(SDL2::GL::CONTEXT_PROFILE_MASK, SDL2::GL::CONTEXT_PROFILE_CORE)
 
-
 # You need to create a window with `OPENGL' flag
 window = Context::Window.new(1024.0, 768.0)
 
@@ -54,6 +53,22 @@ fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S3)
 @world.matrix.model = Drawing::Matrix.identity(4)
 
 @program.uniform_matrix4(@world.matrix.world, 'MVP')
+
+  image = SDL2::Surface.load_bmp("./textures/mf.bmp")
+  id_buf = '    ' # 4 bytes for buffer ID
+  glGenTextures(1, id_buf)
+  texture_id = id_buf.unpack('L')[0]
+  glBindTexture(GL_TEXTURE_2D, texture_id)
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.w, image.h, 0, GL_BGR, GL_UNSIGNED_BYTE, image.pixels)
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+
+  texLocation = @program.get_uniform_location("texture1")
+  glUniform1i(texLocation, 0)
+  glActiveTexture(0)
+  glBindTexture(GL_TEXTURE_2D, texture_id);
+
 
   landscape = Drawing::Object::Landscape.new(50)
 

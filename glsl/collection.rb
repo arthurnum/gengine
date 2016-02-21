@@ -138,9 +138,11 @@ module GLSL
         out vec3 fragColor;
         out mat4 model;
         out mat4 view;
+        out vec2 text_coord;
 
         void main()
         {
+          text_coord = vec2(pos.x / 200.0, pos.z / 200.0);
           fragVertex = pos;
           fragNormal = normal;
           fragColor = color;
@@ -160,13 +162,15 @@ module GLSL
           in mat4 model;
           in mat4 view;
           out vec3 out_color;
+          uniform sampler2D texture1;
+          in vec2 text_coord;
 
           void main()
           {
             vec3 lightNormal = normalize(vec3(0.0, 1.0, 1.0));
             float angle = dot(fragNormal, lightNormal);
-
-            vec3 materialAmbientColor = fragColor;
+            vec3 abyr = texture(texture1, text_coord).rgb;
+            vec3 materialAmbientColor = fragColor * abyr;
             vec3 lightColor = vec3(1.0, 1.0, 1.0);
             out_color = materialAmbientColor * lightColor * angle;
           }

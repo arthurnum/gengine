@@ -34,8 +34,6 @@ module GLSL
       glUniform3fv(ul, 1, vector.to_a.pack('F*'))
     end
 
-    private
-
     def get_uniform_location(name)
       glGetUniformLocation(@id, name)
     end
