@@ -178,7 +178,7 @@ module GLSL
 
             vec4 lightColor = vec4(1.0, 1.0, 1.0, 1.0);
 
-            outputColor0 = abyr;
+            outputColor0 = abyr * abyr.a;
             outputColor1 = materialAmbientColor;
 
             out_color = outputColor0 + (outputColor1 - vec4(abyr.a));

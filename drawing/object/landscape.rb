@@ -95,7 +95,7 @@ module Drawing
 
       def generate_vertex(row, column)
         x = 4.0 * column
-        y = 1.0 * rand
+        y = 0.0 * rand
         z = 4.0 * row
         Vertex.new(x, y, z)
       end
