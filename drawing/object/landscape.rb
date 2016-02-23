@@ -73,6 +73,7 @@ module Drawing
         @vertices.each do |vert|
           data.concat vert.vector.to_a
           data.concat vert.normal.to_a
+          data.concat vert.uva.to_a
         end
         Data::Float.new(data)
       end

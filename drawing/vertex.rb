@@ -1,10 +1,11 @@
 module Drawing
 	class Vertex
-    attr_accessor :vector, :faces, :color
+    attr_accessor :vector, :faces, :color, :uva
 
     def initialize(x, y, z)
       @vector = Vector[x, y, z]
       @color = Vector[1.0, 1.0, 1.0]
+			@uva = Vector[0.0, 0.0, 0.0]
       @faces = []
     end
 

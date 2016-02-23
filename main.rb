@@ -69,13 +69,14 @@ fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S3)
   supervbo = Drawing::VBO.new(:vertex)
   supervbo.bind
   supervbo.data(landscape.vn_data)
-  vao.set_array_pointer(0, 3, GL_FLOAT, GL_FALSE, 24, 0)
-  vao.set_array_pointer(1, 3, GL_FLOAT, GL_FALSE, 24, 12)
+  vao.set_array_pointer(0, 3, GL_FLOAT, GL_FALSE, 36, 0)
+  vao.set_array_pointer(1, 3, GL_FLOAT, GL_FALSE, 36, 12)
+  vao.set_array_pointer(2, 3, GL_FLOAT, GL_FALSE, 36, 24)
 
   vbo = Drawing::VBO.new(:vertex)
   vbo.bind
   vbo.data(landscape.colors_data)
-  vao.set_array_pointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0)
+  vao.set_array_pointer(3, 3, GL_FLOAT, GL_FALSE, 0, 0)
 
   vbo2 = Drawing::VBO.new(:index)
   vbo2.bind
@@ -107,10 +108,34 @@ h_edit_face = lambda do |win, ev|
         end
       end
     end
-  end
 
-  supervbo.bind
-  supervbo.data(landscape.vn_data)
+    supervbo.bind
+    supervbo.data(landscape.vn_data)
+  end
+end
+
+h_apply_texture = lambda do |win, ev|
+  if ev.scancode == SDL2::Key::Scan::DOWN
+    focus_array.each do |face|
+      face.v1.uva = Vector[face.v1.x, face.v1.z, 1.0] unless face.v1.uva[2] > 0.0
+      # center = face.v1
+      # landscape.vertices.each do |vert|
+      #   dx = vert.x - center.x
+      #   dz = vert.z - center.z
+      #   dt = Math.sqrt( dx**2 + dz**2 )
+      #   shift = dt / 10.0
+      #   if shift <= 1.0
+      #     next if vert.uva[2] > 0.0
+      #     dx = dx * 0.5
+      #     dz = dz * 0.5
+      #     vert.uva = Vector[0.5 + dx, 0.5 + dz, 1.0]
+      #   end
+      # end
+    end
+
+    supervbo.bind
+    supervbo.data(landscape.vn_data)
+  end
 end
 
 h_resized = lambda do |win, ev|
@@ -124,7 +149,7 @@ h_mouse_down = lambda do |win, ev|
   vbo = Drawing::VBO.new(:vertex)
   vbo.bind
   vbo.data(landscape.colors_data)
-  vao.set_array_pointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0)
+  vao.set_array_pointer(3, 3, GL_FLOAT, GL_FALSE, 0, 0)
 end
 
 h_mouse_up = lambda do |win, ev|
@@ -144,6 +169,7 @@ end
 
 window.register_event_handler(:key_down, h_escape)
 window.register_event_handler(:key_down, h_edit_face)
+window.register_event_handler(:key_down, h_apply_texture)
 window.register_event_handler(:window, h_resized)
 window.register_event_handler(:mouse_button_down, h_mouse_down)
 window.register_event_handler(:mouse_button_up, h_mouse_up)
