@@ -128,7 +128,7 @@ module GLSL
         #version 330 core
         layout(location=0) in vec3 pos;
         layout(location=1) in vec3 normal;
-        layout(location=2) in vec3 uva;
+        layout(location=2) in float uva;
         layout(location=3) in vec3 color;
         uniform mat4 MVP;
         uniform mat4 M;
@@ -137,7 +137,7 @@ module GLSL
         out vec3 fragVertex;
         out vec3 fragNormal;
         out vec3 fragColor;
-        out vec3 fragUVA;
+        out float fragUVA;
         out mat4 model;
         out mat4 view;
         out vec2 text_coord;
@@ -161,7 +161,7 @@ module GLSL
 
           in vec3 fragVertex;
           in vec3 fragNormal;
-          in vec3 fragUVA;
+          in float fragUVA;
           in vec3 fragColor;
           in mat4 model;
           in mat4 view;
@@ -182,22 +182,15 @@ module GLSL
             vec4 materialAmbientColor = vec4(fragColor, 1.0);
             vec4 abyr = vec4(0.0, 0.0, 0.0, 0.0);
 
-            float size = 10.0;
-            float dx = fragVertex.x - texture_center.x;
-            float dz = fragVertex.z - texture_center.y;
-            if ( (abs(dx) < size) && (abs(dz) < size) ) {
-              float dt = sqrt(dx*dx + dz*dz);
-              float shift = dt / 10.0;
-              float u = 0.5 + (dx * 0.5) / size;
-              float v = 0.5 + (dz * 0.5) / size;
+            if (fragUVA > 0.0) {
+              float dx = fragVertex.x - texture_center.x;
+              float dz = fragVertex.z - texture_center.y;
+              float u = dx * 0.1;
+              float v = dz * 0.1;
               vec2 uv = vec2(u, v);
               abyr = texture(texture1, uv).rgba;
-              float margin = max(abs(dx), abs(dz));
-              if (margin > 6.0) {
-                abyr.a = (size - margin) / 4.0;
-              }
             }
-
+            
             vec4 lightColor = vec4(1.0, 1.0, 1.0, 1.0);
 
             outputColor0 = abyr * abyr.a;

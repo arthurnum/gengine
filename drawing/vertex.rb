@@ -5,7 +5,7 @@ module Drawing
     def initialize(x, y, z)
       @vector = Vector[x, y, z]
       @color = Vector[1.0, 1.0, 1.0]
-			@uva = Vector[0.0, 0.0, 0.0]
+      @uva = 0.0
       @faces = []
     end
 

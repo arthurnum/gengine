@@ -53,7 +53,7 @@ fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S3)
 @world.matrix.model = Drawing::Matrix.identity(4)
 
 @program.uniform_matrix4(@world.matrix.world, 'MVP')
-@program.uniform_vector2fv(Vector[15.0, 15.0], 'texture_center')
+@program.uniform_vector2fv(Vector[0.0, 0.0], 'texture_center')
 
   texture = Drawing::Texture.new
   texture.bind
@@ -70,9 +70,9 @@ fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S3)
   supervbo = Drawing::VBO.new(:vertex)
   supervbo.bind
   supervbo.data(landscape.vn_data)
-  vao.set_array_pointer(0, 3, GL_FLOAT, GL_FALSE, 36, 0)
-  vao.set_array_pointer(1, 3, GL_FLOAT, GL_FALSE, 36, 12)
-  vao.set_array_pointer(2, 3, GL_FLOAT, GL_FALSE, 36, 24)
+  vao.set_array_pointer(0, 3, GL_FLOAT, GL_FALSE, 28, 0)
+  vao.set_array_pointer(1, 3, GL_FLOAT, GL_FALSE, 28, 12)
+  vao.set_array_pointer(2, 1, GL_FLOAT, GL_FALSE, 28, 24)
 
   vbo = Drawing::VBO.new(:vertex)
   vbo.bind
@@ -118,6 +118,7 @@ end
 h_apply_texture = lambda do |win, ev|
   if ev.scancode == SDL2::Key::Scan::DOWN
     focus_array.each do |face|
+      face.v1.uva = 1.0
       # face.v1.uva = Vector[face.v1.x, face.v1.z, 1.0] unless face.v1.uva[2] > 0.0
       # center = face.v1
       # landscape.vertices.each do |vert|
