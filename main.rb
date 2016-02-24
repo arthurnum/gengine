@@ -55,12 +55,21 @@ fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S3)
 @program.uniform_matrix4(@world.matrix.world, 'MVP')
 @program.uniform_vector2fv(Vector[0.0, 0.0], 'texture_center')
 
-  texture = Drawing::Texture.new
-  texture.bind
-  texture.load_bmp("./textures/mf.bmp")
+  texture1 = Drawing::Texture.new
+  texture1.bind
+  texture1.load_bmp("./textures/mf.bmp")
+
+  texture2 = Drawing::Texture.new
+  texture2.bind
+  texture2.load_bmp("./textures/ccw.bmp")
+
   @program.uniform_1i("texture1", 0)
-  glActiveTexture(0)
-  texture.bind
+  glActiveTexture(GL_TEXTURE0)
+  texture1.bind
+
+  @program.uniform_1i("texture2", 1)
+  glActiveTexture(GL_TEXTURE1)
+  texture2.bind
 
   landscape = Drawing::Object::Landscape.new(50)
 
@@ -118,7 +127,10 @@ end
 h_apply_texture = lambda do |win, ev|
   if ev.scancode == SDL2::Key::Scan::DOWN
     focus_array.each do |face|
-      face.v1.uva = 1.0
+      g = rand(10) > 5 ? 0.9 : 1.9
+      face.v1.uva = g
+      face.v2.uva = g
+      face.v3.uva = g
       # face.v1.uva = Vector[face.v1.x, face.v1.z, 1.0] unless face.v1.uva[2] > 0.0
       # center = face.v1
       # landscape.vertices.each do |vert|

@@ -41,7 +41,7 @@ module GLSL
 
     def uniform_1i(name, value)
       ul = get_uniform_location(name)
-      glUniform1i(ul, 0)
+      glUniform1i(ul, value)
     end
 
     private
