@@ -168,7 +168,10 @@ module GLSL
           out vec4 out_color;
           vec4 outputColor0;
           vec4 outputColor1;
+
           uniform sampler2D texture1;
+          uniform vec2 texture_center;
+
           in vec2 text_coord;
 
           void main()
@@ -179,20 +182,15 @@ module GLSL
             vec4 materialAmbientColor = vec4(fragColor, 1.0);
             vec4 abyr = vec4(0.0, 0.0, 0.0, 0.0);
 
-            if (fragUVA.z > 0.0) {
-              float dx = fragVertex.x - fragUVA.x;
-              float dz = fragVertex.z - fragUVA.y;
-              float dt = sqrt(dx*dx + dz*dz);
-              float shift = dt / 10.0;
-              if (shift <= 1.0) {
-                dx = dx * 0.5;
-                dz = dz * 0.5;
-                vec2 uv = vec2(0.5 + dx, 0.5 + dz);
-                abyr = texture(texture1, uv).rgba;
-              }
-
-              //abyr = texture(texture1, fragUVA.xy).rgba;
-              //abyr.a = fragUVA.z;
+            float dx = fragVertex.x - texture_center.x;
+            float dz = fragVertex.z - texture_center.y;
+            float dt = sqrt(dx*dx + dz*dz);
+            float shift = dt / 10.0;
+            if (shift <= 1.0) {
+              dx = dx * 0.5;
+              dz = dz * 0.5;
+              vec2 uv = vec2(0.5 + dx, 0.5 + dz);
+              abyr = texture(texture1, uv).rgba;
             }
 
             vec4 lightColor = vec4(1.0, 1.0, 1.0, 1.0);
