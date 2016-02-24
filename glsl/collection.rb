@@ -188,8 +188,8 @@ module GLSL
             if ( (abs(dx) < size) && (abs(dz) < size) ) {
               float dt = sqrt(dx*dx + dz*dz);
               float shift = dt / 10.0;
-              float u = 0.5 + dx * 0.5;
-              float v = 0.5 + dz * 0.5;
+              float u = 0.5 + (dx * 0.5) / size;
+              float v = 0.5 + (dz * 0.5) / size;
               vec2 uv = vec2(u, v);
               abyr = texture(texture1, uv).rgba;
               float margin = max(abs(dx), abs(dz));

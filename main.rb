@@ -53,7 +53,7 @@ fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S3)
 @world.matrix.model = Drawing::Matrix.identity(4)
 
 @program.uniform_matrix4(@world.matrix.world, 'MVP')
-@program.uniform_vector2fv(Vector[0.0, 0.0], 'texture_center')
+@program.uniform_vector2fv(Vector[15.0, 15.0], 'texture_center')
 
   texture = Drawing::Texture.new
   texture.bind
