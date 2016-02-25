@@ -73,6 +73,13 @@ module Drawing
         @vertices.each do |vert|
           data.concat vert.vector.to_a
           data.concat vert.normal.to_a
+        end
+        Data::Float.new(data)
+      end
+
+      def uva_data
+        data = []
+        @vertices.each do |vert|
           data << vert.uva
         end
         Data::Float.new(data)

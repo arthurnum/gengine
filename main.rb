@@ -79,9 +79,14 @@ fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S3)
   supervbo = Drawing::VBO.new(:vertex)
   supervbo.bind
   supervbo.data(landscape.vn_data)
-  vao.set_array_pointer(0, 3, GL_FLOAT, GL_FALSE, 28, 0)
-  vao.set_array_pointer(1, 3, GL_FLOAT, GL_FALSE, 28, 12)
-  vao.set_array_pointer(2, 1, GL_FLOAT, GL_FALSE, 28, 24)
+  vao.set_array_pointer(0, 3, GL_FLOAT, GL_FALSE, 24, 0)
+  vao.set_array_pointer(1, 3, GL_FLOAT, GL_FALSE, 24, 12)
+
+
+  uva_vbo = Drawing::VBO.new(:vertex)
+  uva_vbo.bind
+  uva_vbo.data(landscape.uva_data)
+  vao.set_array_pointer(2, 1, GL_FLOAT, GL_FALSE, 0, 0)
 
   vbo = Drawing::VBO.new(:vertex)
   vbo.bind
@@ -127,7 +132,7 @@ end
 h_apply_texture = lambda do |win, ev|
   if ev.scancode == SDL2::Key::Scan::DOWN
     focus_array.each do |face|
-      g = rand(10) > 5 ? 0.9 : 1.9
+      g = rand(10) > 5 ? 1 : 2
       face.v1.uva = g
       face.v2.uva = g
       face.v3.uva = g
@@ -147,8 +152,8 @@ h_apply_texture = lambda do |win, ev|
       # end
     end
 
-    supervbo.bind
-    supervbo.data(landscape.vn_data)
+    uva_vbo.bind
+    uva_vbo.data(landscape.uva_data)
   end
 end
 
