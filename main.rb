@@ -106,10 +106,6 @@ focus_array = []
 time_a = Time.now
 frames = 0.0
 
-h_escape = lambda do |win, ev|
-  win.exit if ev.scancode == SDL2::Key::Scan::ESCAPE
-end
-
 h_edit_face = lambda do |win, ev|
   if ev.scancode == SDL2::Key::Scan::UP
     focus_array.each do |face|
@@ -157,10 +153,6 @@ h_apply_texture = lambda do |win, ev|
   end
 end
 
-h_resized = lambda do |win, ev|
-  p 'Augh! RESIZED!'
-end
-
 h_mouse_down = lambda do |win, ev|
   ray = Calculating::Ray.new
   ray.trace(@world.matrix.world, window.width, window.height, ev.x, window.height - ev.y)
@@ -186,10 +178,10 @@ h_mouse_wheel = lambda do |win, ev|
   @world.matrix.view = @world.matrix.view.translate(0.0, 0.0, -ev.y*0.1) if model_mode
 end
 
-window.register_event_handler(:key_down, h_escape)
+Context::WindowCallbacks.init(window)
+
 window.register_event_handler(:key_down, h_edit_face)
 window.register_event_handler(:key_down, h_apply_texture)
-window.register_event_handler(:window, h_resized)
 window.register_event_handler(:mouse_button_down, h_mouse_down)
 window.register_event_handler(:mouse_button_up, h_mouse_up)
 window.register_event_handler(:mouse_motion, h_mouse_motion)
