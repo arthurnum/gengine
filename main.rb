@@ -99,12 +99,13 @@ fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S3)
 
   @count = landscape.size
 
-model_mode = false
-
 focus_array = []
 
 time_a = Time.now
 frames = 0.0
+
+Context::WindowCallbacks.init(window)
+constructor = Context::Constructor.new(window)
 
 h_edit_face = lambda do |win, ev|
   if ev.scancode == SDL2::Key::Scan::UP
@@ -163,27 +164,17 @@ h_mouse_down = lambda do |win, ev|
   vao.set_array_pointer(3, 3, GL_FLOAT, GL_FALSE, 0, 0)
 end
 
-h_mouse_up = lambda do |win, ev|
-  if ev.clicks > 1
-    model_mode = !model_mode
-    p "Model mode #{model_mode ? 'ON' : 'OFF'}"
-  end
-end
-
 h_mouse_motion = lambda do |win, ev|
-  @world.matrix.view = @world.matrix.view.translate(ev.xrel*0.01, -ev.yrel*0.01, 0.0) if model_mode
+  @world.matrix.view = @world.matrix.view.translate(ev.xrel*0.01, -ev.yrel*0.01, 0.0) if constructor.model_mode
 end
 
 h_mouse_wheel = lambda do |win, ev|
-  @world.matrix.view = @world.matrix.view.translate(0.0, 0.0, -ev.y*0.1) if model_mode
+  @world.matrix.view = @world.matrix.view.translate(0.0, 0.0, -ev.y*0.1) if constructor.model_mode
 end
-
-Context::WindowCallbacks.init(window)
 
 window.register_event_handler(:key_down, h_edit_face)
 window.register_event_handler(:key_down, h_apply_texture)
 window.register_event_handler(:mouse_button_down, h_mouse_down)
-window.register_event_handler(:mouse_button_up, h_mouse_up)
 window.register_event_handler(:mouse_motion, h_mouse_motion)
 window.register_event_handler(:mouse_wheel, h_mouse_wheel)
 
