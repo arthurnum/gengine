@@ -183,20 +183,14 @@ module GLSL
             vec4 materialAmbientColor = vec4(fragColor, 1.0);
             vec4 abyr = vec4(0.0, 0.0, 0.0, 0.0);
 
-            if (fragUVA > 0) {
-              float dx = fragVertex.x - texture_center.x;
-              float dz = fragVertex.z - texture_center.y;
-              float u = dx * 0.1;
-              float v = dz * 0.1;
-              vec2 uv = vec2(u, v);
-              //abyr = texture(texture1, uv).rgba;
-              if (fragUVA == 1) {
-                abyr = texture(texture1, uv).rgba;
-              }
-            else if (fragUVA == 2) {
-                abyr = texture(texture2, uv).rgba;
-              }
-            }
+
+            float dx = fragVertex.x - texture_center.x;
+            float dz = fragVertex.z - texture_center.y;
+            float u = dx * 0.02;
+            float v = dz * 0.02;
+            vec2 uv = vec2(u, v);
+            abyr = texture(texture1, uv).rgba;
+
 
             vec4 lightColor = vec4(1.0, 1.0, 1.0, 1.0);
 

@@ -49,27 +49,26 @@ fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S3)
 @program.link_and_use
 
 @world.matrix.projection = Drawing::Matrix.perspective(65, window.width, window.height, 0.1, 1000.0)
-@world.matrix.view = Drawing::Matrix.look_at(Vector[0.0, 15.0, -2.0], Vector[0.0, 0.0, 50.0], Vector[0.0, 1.0, 0.0])
+@world.matrix.view = Drawing::Matrix.look_at(Vector[0.0, 3.0, 40.0], Vector[0.0, 0.0, 50.0], Vector[0.0, 1.0, 0.0])
 @world.matrix.model = Drawing::Matrix.identity(4)
 
 @program.uniform_matrix4(@world.matrix.world, 'MVP')
 @program.uniform_vector2fv(Vector[0.0, 0.0], 'texture_center')
 
+
   texture1 = Drawing::Texture.new
   texture1.bind
-  texture1.load_bmp("./textures/mf.bmp")
 
-  texture2 = Drawing::Texture.new
-  texture2.bind
-  texture2.load_bmp("./textures/ccw.bmp")
+  image = SDL2::Surface.load_bmp("./textures/ccw.bmp")
+  pbo = Drawing::PBO.new
+  pbo.bind
+  pbo.data(image.pixels)
+  pbo.try_dummy
+
+  texture1.setup(image)
 
   @program.uniform_1i("texture1", 0)
   glActiveTexture(GL_TEXTURE0)
-  texture1.bind
-
-  @program.uniform_1i("texture2", 1)
-  glActiveTexture(GL_TEXTURE1)
-  texture2.bind
 
   landscape = Drawing::Object::Landscape.new(50)
 
@@ -128,8 +127,10 @@ end
 
 h_apply_texture = lambda do |win, ev|
   if ev.scancode == SDL2::Key::Scan::DOWN
+    pbo.try_dummy
     focus_array.each do |face|
       g = rand(10) > 5 ? 1 : 2
+      g = 1.0
       face.v1.uva = g
       face.v2.uva = g
       face.v3.uva = g
