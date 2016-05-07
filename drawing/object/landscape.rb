@@ -53,6 +53,13 @@ module Drawing
         @normals = []
         @vertices.each { |v| @normals << v.normal }
 
+        ###
+        # initialize uva index
+        ###
+        @vertices.each do |vert|
+          vert.uva = 1.0
+        end
+
         @indices = generate_indices(dim)
       end
 

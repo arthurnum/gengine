@@ -136,15 +136,13 @@ module GLSL
 
         out vec3 fragVertex;
         out vec3 fragNormal;
-        flat out float fragUVA;
-        flat out vec3 fragColor;
+        out float fragUVA;
+        out vec3 fragColor;
         out mat4 model;
         out mat4 view;
-        out vec2 text_coord;
 
         void main()
         {
-          text_coord = vec2(pos.x / 200.0, pos.z / 200.0);
           fragVertex = pos;
           fragNormal = normal;
           fragUVA = uva;
@@ -161,8 +159,8 @@ module GLSL
 
           in vec3 fragVertex;
           in vec3 fragNormal;
-          flat in float fragUVA;
-          flat in vec3 fragColor;
+          in float fragUVA;
+          in vec3 fragColor;
           in mat4 model;
           in mat4 view;
           out vec4 out_color;
@@ -173,8 +171,6 @@ module GLSL
           uniform sampler2D texture2;
           uniform vec2 texture_center;
 
-          in vec2 text_coord;
-
           void main()
           {
             vec3 lightNormal = normalize(vec3(0.0, 1.0, 1.0));
@@ -183,13 +179,16 @@ module GLSL
             vec4 materialAmbientColor = vec4(fragColor, 1.0);
             vec4 abyr = vec4(0.0, 0.0, 0.0, 0.0);
 
-
             float dx = fragVertex.x - texture_center.x;
             float dz = fragVertex.z - texture_center.y;
-            float u = dx * 0.02;
-            float v = dz * 0.02;
+            float cull = 0.1;
+            if (fragVertex.z > 20.0) { cull *= 0.5; }
+            if (fragVertex.z > 50.0) { cull *= 0.5; }
+            if (fragVertex.z > 100.0) { cull *= 0.5; }
+            float u = dx * cull;
+            float v = dz * cull;
             vec2 uv = vec2(u, v);
-            abyr = texture(texture1, uv).rgba;
+            abyr = texture(texture1, uv).rgba * fragUVA + texture(texture2, uv).rgba * (1.0 - fragUVA);
 
 
             vec4 lightColor = vec4(1.0, 1.0, 1.0, 1.0);

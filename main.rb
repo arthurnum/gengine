@@ -49,26 +49,26 @@ fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S3)
 @program.link_and_use
 
 @world.matrix.projection = Drawing::Matrix.perspective(65, window.width, window.height, 0.1, 1000.0)
-@world.matrix.view = Drawing::Matrix.look_at(Vector[0.0, 3.0, 40.0], Vector[0.0, 0.0, 50.0], Vector[0.0, 1.0, 0.0])
+@world.matrix.view = Drawing::Matrix.look_at(Vector[0.0, 20.0, -20.0], Vector[0.0, 0.0, 50.0], Vector[0.0, 1.0, 0.0])
 @world.matrix.model = Drawing::Matrix.identity(4)
 
 @program.uniform_matrix4(@world.matrix.world, 'MVP')
 @program.uniform_vector2fv(Vector[0.0, 0.0], 'texture_center')
 
 
+  glActiveTexture(GL_TEXTURE0)
   texture1 = Drawing::Texture.new
   texture1.bind
-
-  image = SDL2::Surface.load_bmp("./textures/ccw.bmp")
-  pbo = Drawing::PBO.new
-  pbo.bind
-  pbo.data(image.pixels)
-  pbo.try_dummy
-
-  texture1.setup(image)
+  texture1.load("./textures/ccw.bmp")
 
   @program.uniform_1i("texture1", 0)
-  glActiveTexture(GL_TEXTURE0)
+
+  glActiveTexture(GL_TEXTURE1)
+  texture2 = Drawing::Texture.new
+  texture2.bind
+  texture2.load("./textures/mf.bmp")
+
+  @program.uniform_1i("texture2", 1)
 
   landscape = Drawing::Object::Landscape.new(50)
 
@@ -123,31 +123,44 @@ h_edit_face = lambda do |win, ev|
     supervbo.bind
     supervbo.data(landscape.vn_data)
   end
+
+  if ev.scancode == SDL2::Key::Scan::DOWN
+    focus_array.each do |face|
+      center = face.v1
+      landscape.vertices.each do |vert|
+        dt = Math.sqrt( (vert.x - center.x)**2 + (vert.z - center.z)**2 )
+        shift = 0.05 * ( (20.0 - dt) / 20.0 )
+        if shift > 0.0
+          vert.vector += Vector[0.0, -shift, 0.0]
+          vert.faces.each { |f| f.reset_normal }
+        end
+      end
+    end
+
+    supervbo.bind
+    supervbo.data(landscape.vn_data)
+  end
 end
 
 h_apply_texture = lambda do |win, ev|
-  if ev.scancode == SDL2::Key::Scan::DOWN
-    pbo.try_dummy
+  if ev.scancode == SDL2::Key::Scan::LEFT
     focus_array.each do |face|
-      g = rand(10) > 5 ? 1 : 2
-      g = 1.0
-      face.v1.uva = g
-      face.v2.uva = g
-      face.v3.uva = g
-      # face.v1.uva = Vector[face.v1.x, face.v1.z, 1.0] unless face.v1.uva[2] > 0.0
-      # center = face.v1
-      # landscape.vertices.each do |vert|
-      #   dx = vert.x - center.x
-      #   dz = vert.z - center.z
-      #   dt = Math.sqrt( dx**2 + dz**2 )
-      #   shift = dt / 10.0
-      #   if shift <= 1.0
-      #     next if vert.uva[2] > 0.0
-      #     dx = dx * 0.5
-      #     dz = dz * 0.5
-      #     vert.uva = Vector[0.5 + dx, 0.5 + dz, 1.0]
-      #   end
-      # end
+      face.each_vertex do |v|
+        v.uva -= 0.1
+        v.uva = 0.0 if v.uva < 0.0
+      end
+    end
+
+    uva_vbo.bind
+    uva_vbo.data(landscape.uva_data)
+  end
+
+  if ev.scancode == SDL2::Key::Scan::RIGHT
+    focus_array.each do |face|
+      face.each_vertex do |v|
+        v.uva += 0.1
+        v.uva = 1.0 if v.uva > 1.0
+      end
     end
 
     uva_vbo.bind

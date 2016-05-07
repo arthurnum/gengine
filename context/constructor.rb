@@ -25,13 +25,13 @@ module Context
 
     def h_mouse_motion
       lambda do |win, ev|
-        @world.matrix.view = @world.matrix.view.translate(ev.xrel*0.01, -ev.yrel*0.01, 0.0) if model_mode
+        @world.matrix.view = @world.matrix.view.translate(ev.xrel*0.05, -ev.yrel*0.05, 0.0) if model_mode
       end
     end
 
     def h_mouse_wheel
       lambda do |win, ev|
-        @world.matrix.view = @world.matrix.view.translate(0.0, 0.0, -ev.y*0.1) if model_mode
+        @world.matrix.view = @world.matrix.view.translate(0.0, 0.0, -ev.y*0.5) if model_mode
       end
     end
 

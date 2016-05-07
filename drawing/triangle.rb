@@ -46,6 +46,10 @@ module Drawing
       @vertices[2]
     end
 
+    def each_vertex
+      @vertices.each { |v| yield v }
+    end
+
     private
 
     def calculate_normal
