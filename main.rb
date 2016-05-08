@@ -19,10 +19,8 @@ def render
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
   @program.uniform_matrix4(@world.matrix.world, 'MVP')
-  @program.uniform_matrix4(@world.matrix.model, 'M')
-  @program.uniform_matrix4(@world.matrix.view, 'V')
 
-  glDrawElements(GL_TRIANGLE_STRIP, @count, GL_UNSIGNED_INT, 0);
+  glDrawElements(GL_TRIANGLE_STRIP, @count, GL_UNSIGNED_INT, 0)
 end
 
 SDL2.init(SDL2::INIT_EVERYTHING)
@@ -32,7 +30,7 @@ SDL2::GL.set_attribute(SDL2::GL::CONTEXT_MINOR_VERSION, 3)
 SDL2::GL.set_attribute(SDL2::GL::CONTEXT_PROFILE_MASK, SDL2::GL::CONTEXT_PROFILE_CORE)
 
 # You need to create a window with `OPENGL' flag
-window = Context::Window.new(1024.0, 768.0)
+window = Context::Window.new(1368.0, 768.0)
 
 # Create a OpenGL context attached to the window
 context = SDL2::GL::Context.create(window.sdl_window)
@@ -49,7 +47,7 @@ fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S3)
 @program.link_and_use
 
 @world.matrix.projection = Drawing::Matrix.perspective(65, window.width, window.height, 0.1, 1000.0)
-@world.matrix.view = Drawing::Matrix.look_at(Vector[0.0, 20.0, -20.0], Vector[0.0, 0.0, 50.0], Vector[0.0, 1.0, 0.0])
+@world.matrix.view = Drawing::Matrix.look_at(Vector[0.0, 20.0, -20.0], Vector[100.0, 0.0, 50.0], Vector[0.0, 1.0, 0.0])
 @world.matrix.model = Drawing::Matrix.identity(4)
 
 @program.uniform_matrix4(@world.matrix.world, 'MVP')
@@ -70,7 +68,7 @@ fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S3)
 
   @program.uniform_1i("texture2", 1)
 
-  landscape = Drawing::Object::Landscape.new(50)
+  landscape = Drawing::Object::Landscape.new(200)
 
   vao = Drawing::VAO.new
   vao.bind
@@ -87,9 +85,9 @@ fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S3)
   uva_vbo.data(landscape.uva_data)
   vao.set_array_pointer(2, 1, GL_FLOAT, GL_FALSE, 0, 0)
 
-  vbo = Drawing::VBO.new(:vertex)
-  vbo.bind
-  vbo.data(landscape.colors_data)
+  vbocolor = Drawing::VBO.new(:vertex)
+  vbocolor.bind
+  vbocolor.data(landscape.colors_data)
   vao.set_array_pointer(3, 3, GL_FLOAT, GL_FALSE, 0, 0)
 
   vbo2 = Drawing::VBO.new(:index)
@@ -97,6 +95,7 @@ fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S3)
   vbo2.data(landscape.indices_data)
 
   @count = landscape.size
+  puts "Landscape size: #{@count}"
 
 focus_array = []
 
@@ -169,13 +168,17 @@ h_apply_texture = lambda do |win, ev|
 end
 
 h_mouse_down = lambda do |win, ev|
+  if @world.model_mode?
+    # ray = Calculating::Ray.new
+    # ray.trace(@world.matrix.world, window.width, window.height, ev.x, window.height - ev.y)
+    # focus_array = ray.intersection(landscape.faces)
+    #
+    # vbocolor.bind
+    # vbocolor.data(landscape.colors_data)
+  end
   ray = Calculating::Ray.new
   ray.trace(@world.matrix.world, window.width, window.height, ev.x, window.height - ev.y)
-  focus_array = ray.intersection(landscape.faces)
-  vbo = Drawing::VBO.new(:vertex)
-  vbo.bind
-  vbo.data(landscape.colors_data)
-  vao.set_array_pointer(3, 3, GL_FLOAT, GL_FALSE, 0, 0)
+  puts ray.box_intersect
 end
 
 window.register_event_handler(:key_down, h_edit_face)

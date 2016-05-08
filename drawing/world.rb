@@ -12,10 +12,14 @@ module Drawing
       end
     end
 
-    attr_accessor :matrix
+    attr_accessor :matrix, :constructor
 
     def initialize
       @matrix = MatrixList.new
+    end
+
+    def model_mode?
+      constructor.model_mode
     end
   end
 end

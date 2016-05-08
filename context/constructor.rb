@@ -5,18 +5,19 @@ module Context
     def initialize(window, world)
       @window = window
       @world = world
+      @world.constructor = self
       @model_mode = false
 
-      @window.register_event_handler(:mouse_button_up, h_mouse_up)
+      @window.register_event_handler(:key_down, h_model_mode)
       @window.register_event_handler(:mouse_motion, h_mouse_motion)
       @window.register_event_handler(:mouse_wheel, h_mouse_wheel)
     end
 
     private
 
-    def h_mouse_up
+    def h_model_mode
       lambda do |win, ev|
-        if ev.clicks > 1
+        if ev.scancode == SDL2::Key::Scan::O
           @model_mode = !@model_mode
           p model_mode_status_string
         end
