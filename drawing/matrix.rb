@@ -6,6 +6,32 @@ module Drawing
       self * Drawing::Matrix[[1.0, 0.0, 0.0, x],[0.0, 1.0, 0.0, y],[0.0, 0.0, 1.0, z],[0.0, 0.0, 0.0, 1.0]]
     end
 
+    def rotate(angle, x, y, z)
+      v = Vector[x, y, z].normalize
+      x, y, z = v.to_a
+      angle = angle * Math::PI / 180.0
+      c = Math::cos(angle)
+      s = Math::sin(angle)
+
+      a1 = x*x*(1 - c) + c
+      a2 = x*y*(1 - c) - z*s
+      a3 = x*z*(1 - c) + y*s
+
+      b1 = y*x*(1 - c) + z*s
+      b2 = y*y*(1 - c) + c
+      b3 = y*z*(1 - c) - x*s
+
+      c1 = z*x*(1 - c) - y*s
+      c2 = z*y*(1 - c) + x*s
+      c3 = z*z*(1 - c) + c
+      self * Drawing::Matrix[
+        [a1, a2, a3, 0],
+        [b1, b2, b3, 0],
+        [c1, c2, c3, 0],
+        [ 0,  0,  0, 1]
+      ]
+    end
+
     class << self
       def perspective(angle, w, h, near, far)
         aspect = w / h

@@ -48,8 +48,10 @@ fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S3)
 @program.attach_shaders(vertex_shader, fragment_shader)
 @program.link_and_use
 
+@world.camera = Drawing::Camera.new(Vector[0.0, 3.0, -10.0], 0.0)
 @world.matrix.projection = Drawing::Matrix.perspective(65, window.width, window.height, 0.1, 1000.0)
-@world.matrix.view = Drawing::Matrix.look_at(Vector[0.0, 20.0, -20.0], Vector[100.0, 0.0, 50.0], Vector[0.0, 1.0, 0.0])
+# @world.matrix.view = Drawing::Matrix.look_at(Vector[0.0, 20.0, -20.0], Vector[100.0, 0.0, 50.0], Vector[0.0, 1.0, 0.0])
+@world.matrix.view = @world.camera.view
 @world.matrix.model = Drawing::Matrix.identity(4)
 
 @program.uniform_matrix4(@world.matrix.world, 'MVP')

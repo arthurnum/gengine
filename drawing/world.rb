@@ -12,7 +12,7 @@ module Drawing
       end
     end
 
-    attr_accessor :matrix, :constructor
+    attr_accessor :matrix, :constructor, :camera
 
     def initialize
       @matrix = MatrixList.new

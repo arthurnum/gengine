@@ -1,3 +1,4 @@
+require_relative 'camera'
 require_relative 'vao'
 require_relative 'vbo'
 require_relative 'pbo'
