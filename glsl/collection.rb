@@ -59,7 +59,7 @@ module GLSL
             outputColor1 = materialAmbientColor;
 
             out_color = outputColor0 + (outputColor1 - vec4(abyr.a));
-            out_color = out_color * lightColor * angle;
+            out_color = out_color * lightColor * max(angle, 0.1);
           }
         )
   end
