@@ -178,7 +178,10 @@ h_mouse_down = lambda do |win, ev|
   end
   ray = Calculating::Ray.new
   ray.trace(@world.matrix.world, window.width, window.height, ev.x, window.height - ev.y)
-  puts ray.box_intersect
+  landscape.ray_intersect(ray)
+
+  vbocolor.bind
+  vbocolor.data(landscape.colors_data)
 end
 
 window.register_event_handler(:key_down, h_edit_face)

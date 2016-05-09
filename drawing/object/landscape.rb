@@ -6,6 +6,12 @@ module Drawing
 
       def initialize(dim)
         ###
+        # generate octree
+        ###
+        @octree = Calculating::Octree.new
+        @octree.build_by(dim: dim, voxel_size: 10.0)
+
+        ###
         # generate vertices
         ###
         @vertices = []
@@ -28,21 +34,25 @@ module Drawing
               v2 = @vertices[diff + dim]
               v3 = @vertices[diff + dim + 1]
               @faces << Triangle.new(v1, v2, v3)
+              @octree.add_face(@faces.last)
 
               v1 = @vertices[diff + 1]
               v2 = @vertices[diff]
               v3 = @vertices[diff + dim + 1]
               @faces << Triangle.new(v1, v2, v3)
+              @octree.add_face(@faces.last)
             else
               v1 = @vertices[diff]
               v2 = @vertices[diff + dim]
               v3 = @vertices[diff + 1]
               @faces << Triangle.new(v1, v2, v3)
+              @octree.add_face(@faces.last)
 
               v1 = @vertices[diff + 1]
               v2 = @vertices[diff + dim]
               v3 = @vertices[diff + dim + 1]
               @faces << Triangle.new(v1, v2, v3)
+              @octree.add_face(@faces.last)
             end
           end
         end
@@ -104,6 +114,10 @@ module Drawing
 
       def size
         @indices.size
+      end
+
+      def ray_intersect(ray)
+        @octree.ray_intersect(ray)
       end
 
       private

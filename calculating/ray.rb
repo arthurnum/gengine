@@ -43,45 +43,6 @@ module Calculating
       result
     end
 
-    def box_intersect
-      tmin = (0.0 - near[0]) / far[0]
-      tmax = (10.0 - near[0]) / far[0]
-
-      if (tmin > tmax)
-        buf = tmin
-        tmin = tmax
-        tmax = buf
-      end
-
-      tymin = (-5.0 - near[1]) / far[1]
-      tymax = (5.0 - near[1]) / far[1]
-
-      if (tymin > tymax)
-        buf = tymin
-        tymin = tymax
-        tymax = buf
-      end
-
-      return false if ((tmin > tymax) || (tymin > tmax))
-
-      tmin = tymin if (tymin > tmin)
-
-      tmax = tymax if (tymax < tmax)
-
-      tzmin = (0.0 - near[2]) / far[2]
-      tzmax = (10.0 - near[2]) / far[2]
-
-      if (tzmin > tzmax)
-        buf = tzmin
-        tzmin = tzmax
-        tzmax = buf
-      end
-
-      return false if ((tmin > tzmax) || (tzmin > tmax))
-
-      return true
-    end
-
     private
 
     def clip(matrix, v)
