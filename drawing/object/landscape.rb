@@ -5,27 +5,35 @@ module Drawing
                   :vertices
 
       def initialize(dim)
+        puts "Initialize landscape object."
+
         ###
         # generate octree
         ###
+        print "Generate octree... "
         @octree = Calculating::Octree.new
         @octree.build_by(dim: dim, voxel_size: 10.0)
+        puts "Done."
 
         ###
         # generate vertices
         ###
+        print "Generate vertices... "
         @vertices = []
         dim.times do |row|
           dim.times do |column|
             @vertices << generate_vertex(row, column)
           end
         end
+        puts "Done."
 
         ###
         # generate triangle faces
         ###
+        print "Generate triangle faces... \r"
         @faces = []
         (dim-1).times do |row|
+          print "Generate triangle faces... (#{row}/#{dim})\r"
           (dim-1).times do |column|
             diff = row * dim + column
 
@@ -56,12 +64,15 @@ module Drawing
             end
           end
         end
+        puts "Generate triangle faces... (#{dim}/#{dim}) Done."
 
         ###
         # generate normals
         ###
+        print "Generate normals... "
         @normals = []
         @vertices.each { |v| @normals << v.normal }
+        puts "Done."
 
         ###
         # initialize uva index
