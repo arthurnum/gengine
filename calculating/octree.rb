@@ -19,10 +19,12 @@ module Calculating
       end
     end
 
-    attr_accessor :roots
+    attr_accessor :roots, :focus_array, :focus_array_vertices
 
     def initialize
       @roots = []
+      @focus_array = []
+      @focus_array_vertices = []
     end
 
     def build_by(options)
@@ -57,8 +59,30 @@ module Calculating
     end
 
     def ray_intersect(ray)
-      @roots.each { |node| node.ray_intersect(ray) }
+      @focus_array.each { |face| face.focus = false }
+      @focus_array = []
+      @focus_array_vertices = []
+
+      @roots.each do |node|
+        result = node.ray_intersect(ray)
+        next unless result
+
+        if result.any?
+          set_focus(result)
+          break
+        end
+      end
     end
 
+    private
+
+    def set_focus(array)
+      @focus_array = array
+      array.each do |face|
+        face.focus = true
+        @focus_array_vertices.concat face.vertices
+      end
+      @focus_array_vertices.uniq!
+    end
   end
 end

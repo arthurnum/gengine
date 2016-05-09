@@ -131,6 +131,46 @@ module Drawing
         @octree.ray_intersect(ray)
       end
 
+      def focus_array
+        @octree.focus_array
+      end
+
+      def up!(radius = 10.0)
+        shift!(radius, 0.01)
+      end
+
+      def down!(radius = 10.0)
+        shift!(radius, -0.01)
+      end
+
+      def shift!(radius, value)
+        xd = 0.0
+        zd = 0.0
+
+        @octree.focus_array_vertices.each do |v|
+          xd += v.x
+          zd += v.z
+        end
+
+        xd /= @octree.focus_array_vertices.size
+        zd /= @octree.focus_array_vertices.size
+
+        touch_faces = []
+
+        vertices.each do |v|
+          dt = Math.sqrt( (v.x - xd)**2 + (v.z - zd)**2 )
+          # shift = 0.01 * ( (radius - dt) / radius )
+          s = radius - dt
+          if s > 0.0
+            dy = value * Math.sqrt(s)
+            v.vector += Vector[0.0, dy, 0.0]
+            touch_faces.concat v.faces
+          end
+        end
+
+        touch_faces.uniq.each(&:reset_normal)
+      end
+
       private
 
       def generate_vertex(row, column)

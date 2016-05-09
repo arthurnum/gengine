@@ -1,6 +1,6 @@
 module Drawing
   class Triangle
-    attr_accessor :focus
+    attr_accessor :focus, :vertices
 
     def initialize(v1, v2, v3)
       @vertices = [v1, v2, v3]

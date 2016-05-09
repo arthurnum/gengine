@@ -37,8 +37,7 @@ module Calculating
         y = t * @direct[1] + @far[1]
         z = t * @direct[2] + @far[2]
         point = Vector[x, y, z]
-        tr.focus = tr.has?(point)
-        result << tr if tr.focus
+        result << tr if tr.has?(point)
       end
       result
     end

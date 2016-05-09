@@ -15,6 +15,8 @@ include GLSL
 
 @world = Drawing::World.new
 
+touch_supervbo = false
+
 def render
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
@@ -68,7 +70,7 @@ fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S3)
 
   @program.uniform_1i("texture2", 1)
 
-  landscape = Drawing::Object::Landscape.new(200)
+  landscape = Drawing::Object::Landscape.new(100)
 
   vao = Drawing::VAO.new
   vao.bind
@@ -107,43 +109,19 @@ constructor = Context::Constructor.new(window, @world)
 
 h_edit_face = lambda do |win, ev|
   if ev.scancode == SDL2::Key::Scan::UP
-    focus_array.each do |face|
-      center = face.v1
-      landscape.vertices.each do |vert|
-        dt = Math.sqrt( (vert.x - center.x)**2 + (vert.z - center.z)**2 )
-        shift = 0.05 * ( (20.0 - dt) / 20.0 )
-        if shift > 0.0
-          vert.vector += Vector[0.0, shift, 0.0]
-          vert.faces.each { |f| f.reset_normal }
-        end
-      end
-    end
-
-    supervbo.bind
-    supervbo.data(landscape.vn_data)
+    landscape.up!(5.0)
+    touch_supervbo = true
   end
 
   if ev.scancode == SDL2::Key::Scan::DOWN
-    focus_array.each do |face|
-      center = face.v1
-      landscape.vertices.each do |vert|
-        dt = Math.sqrt( (vert.x - center.x)**2 + (vert.z - center.z)**2 )
-        shift = 0.05 * ( (20.0 - dt) / 20.0 )
-        if shift > 0.0
-          vert.vector += Vector[0.0, -shift, 0.0]
-          vert.faces.each { |f| f.reset_normal }
-        end
-      end
-    end
-
-    supervbo.bind
-    supervbo.data(landscape.vn_data)
+    landscape.down!(5.0)
+    touch_supervbo = true
   end
 end
 
 h_apply_texture = lambda do |win, ev|
   if ev.scancode == SDL2::Key::Scan::LEFT
-    focus_array.each do |face|
+    landscape.focus_array.each do |face|
       face.each_vertex do |v|
         v.uva -= 0.1
         v.uva = 0.0 if v.uva < 0.0
@@ -155,7 +133,7 @@ h_apply_texture = lambda do |win, ev|
   end
 
   if ev.scancode == SDL2::Key::Scan::RIGHT
-    focus_array.each do |face|
+    landscape.focus_array.each do |face|
       face.each_vertex do |v|
         v.uva += 0.1
         v.uva = 1.0 if v.uva > 1.0
@@ -168,14 +146,6 @@ h_apply_texture = lambda do |win, ev|
 end
 
 h_mouse_down = lambda do |win, ev|
-  if @world.model_mode?
-    # ray = Calculating::Ray.new
-    # ray.trace(@world.matrix.world, window.width, window.height, ev.x, window.height - ev.y)
-    # focus_array = ray.intersection(landscape.faces)
-    #
-    # vbocolor.bind
-    # vbocolor.data(landscape.colors_data)
-  end
   ray = Calculating::Ray.new
   ray.trace(@world.matrix.world, window.width, window.height, ev.x, window.height - ev.y)
   landscape.ray_intersect(ray)
@@ -196,6 +166,12 @@ loop do
   exit if window.exit?
 
   window.gl_swap
+
+  if touch_supervbo
+    supervbo.bind
+    supervbo.data(landscape.vn_data)
+    touch_supervbo = false
+  end
 
   frames += 1.0
   time_b = Time.now

@@ -41,7 +41,7 @@ module GLSL
 
           void main()
           {
-            vec3 lightNormal = normalize(vec3(0.0, 1.0, 1.0));
+            vec3 lightNormal = normalize(vec3(0.0, 1.0, 0.0));
             float angle = dot(fragNormal, lightNormal);
 
             vec4 materialAmbientColor = vec4(fragColor, 1.0);

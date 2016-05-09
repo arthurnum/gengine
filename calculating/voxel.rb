@@ -20,8 +20,10 @@ module Calculating
 
     def ray_intersect(ray)
       if box_intersect?(ray)
-        ray.intersection(@faces)
+        return ray.intersection(@faces)
       end
+
+      nil
     end
 
     def box_intersect?(ray)
