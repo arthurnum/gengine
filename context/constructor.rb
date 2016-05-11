@@ -35,7 +35,6 @@ module Context
 
     def h_mouse_motion
       lambda do |win, ev|
-        # @world.matrix.view = @world.matrix.view.translate(ev.xrel*0.05, -ev.yrel*0.05, 0.0) if model_mode
         if model_mode
           @world.camera.rotate(ev.xrel / 4.0)
           @world.camera.move(ev.yrel / 4.0)
@@ -46,7 +45,8 @@ module Context
 
     def h_mouse_wheel
       lambda do |win, ev|
-        @world.matrix.view = @world.matrix.view.translate(0.0, 0.0, -ev.y*0.5) if model_mode
+        @world.camera.move_y(-ev.y / 4.0)
+        @world.matrix.view = @world.camera.view
       end
     end
 

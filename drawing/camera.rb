@@ -27,6 +27,11 @@ module Drawing
       calculate_look_at
     end
 
+    def move_y(aspect)
+      @position += Vector[0.0, aspect, 0.0]
+      calculate_look_at
+    end
+
     private
 
     def calculate_look_at
