@@ -32,6 +32,10 @@ module Drawing
       calculate_look_at
     end
 
+    def normal
+      (@position - @look_at).normalize
+    end
+
     private
 
     def calculate_look_at
