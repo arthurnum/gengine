@@ -1,13 +1,15 @@
 module Context
   class Constructor
-    attr_accessor :model_mode
+    attr_accessor :model_mode, :shift_radius
 
     def initialize(window, world)
       @window = window
       @world = world
       @world.constructor = self
       @model_mode = false
+      @shift_radius = 5.0
 
+      @window.register_event_handler(:key_down, h_shift_radius)
       @window.register_event_handler(:key_down, h_model_mode)
       @window.register_event_handler(:key_down, h_rotate_world)
       @window.register_event_handler(:mouse_motion, h_mouse_motion)
@@ -15,6 +17,29 @@ module Context
     end
 
     private
+
+    def h_shift_radius
+      lambda do |win, ev|
+        @shift_radius = case ev.scancode
+        when SDL2::Key::Scan::K1
+          1.0
+        when SDL2::Key::Scan::K2
+          2.0
+        when SDL2::Key::Scan::K3
+          3.0
+        when SDL2::Key::Scan::K4
+          4.0
+        when SDL2::Key::Scan::K5
+          5.0
+        when SDL2::Key::Scan::K6
+          6.0
+        when SDL2::Key::Scan::K7
+          7.0
+        else
+          @shift_radius
+        end
+      end
+    end
 
     def h_model_mode
       lambda do |win, ev|

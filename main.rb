@@ -111,12 +111,12 @@ constructor = Context::Constructor.new(window, @world)
 
 h_edit_face = lambda do |win, ev|
   if ev.scancode == SDL2::Key::Scan::UP
-    landscape.up!(5.0)
+    landscape.up!(constructor.shift_radius)
     touch_supervbo = true
   end
 
   if ev.scancode == SDL2::Key::Scan::DOWN
-    landscape.down!(5.0)
+    landscape.down!(constructor.shift_radius)
     touch_supervbo = true
   end
 end
