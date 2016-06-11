@@ -11,7 +11,6 @@ module Context
 
       @window.register_event_handler(:key_down, h_shift_radius)
       @window.register_event_handler(:key_down, h_model_mode)
-      @window.register_event_handler(:key_down, h_rotate_world)
       @window.register_event_handler(:mouse_motion, h_mouse_motion)
       @window.register_event_handler(:mouse_wheel, h_mouse_wheel)
     end
@@ -46,14 +45,6 @@ module Context
         if ev.scancode == SDL2::Key::Scan::O
           @model_mode = !@model_mode
           p model_mode_status_string
-        end
-      end
-    end
-
-    def h_rotate_world
-      lambda do |win, ev|
-        if model_mode
-          @world.matrix.model = @world.matrix.model.rotate(1.0, 0.0, 1.0, 0.0) if ev.scancode == SDL2::Key::Scan::RIGHT
         end
       end
     end
