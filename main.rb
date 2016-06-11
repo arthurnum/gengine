@@ -20,9 +20,15 @@ touch_supervbo = false
 def render
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
+  @program.use
   @program.uniform_matrix4(@world.matrix.world, 'MVP')
 
+  @vao.bind
   glDrawElements(GL_TRIANGLE_STRIP, @count, GL_UNSIGNED_INT, 0)
+
+  @program_ortho2d.use
+  @program_ortho2d.uniform_matrix4(@mart, 'MVP')
+  @rect.draw
 end
 
 SDL2.init(SDL2::INIT_EVERYTHING)
@@ -43,10 +49,15 @@ glEnable(GL_DEPTH_TEST)
 
 vertex_shader = Shader.new(:vertex, Collection::VERTEX_SHADER_S3)
 fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S3)
+fragment_ortho2d_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_ORTHO2D)
 
 @program = Program.new
 @program.attach_shaders(vertex_shader, fragment_shader)
 @program.link_and_use
+
+@program_ortho2d = Program.new
+@program_ortho2d.attach_shaders(vertex_shader, fragment_ortho2d_shader)
+@program_ortho2d.link
 
 @world.camera = Drawing::Camera.new(Vector[0.0, 3.0, -10.0], 0.0)
 @world.matrix.projection = Drawing::Matrix.perspective(65, window.width, window.height, 0.1, 1000.0)
@@ -72,27 +83,30 @@ fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S3)
 
   @program.uniform_1i("texture2", 1)
 
-  landscape = Drawing::Object::Landscape.new(100)
+  landscape = Drawing::Object::Landscape.new(50)
+  @rect = Drawing::Object::Rectangle.new
+  @mart = Drawing::Matrix.ortho2d(0.0, 1.0, 0.0, 1.0)
 
-  vao = Drawing::VAO.new
-  vao.bind
+
+  @vao = Drawing::VAO.new
+  @vao.bind
 
   supervbo = Drawing::VBO.new(:vertex)
   supervbo.bind
   supervbo.data(landscape.vn_data)
-  vao.set_array_pointer(0, 3, GL_FLOAT, GL_FALSE, 24, 0)
-  vao.set_array_pointer(1, 3, GL_FLOAT, GL_FALSE, 24, 12)
+  @vao.set_array_pointer(0, 3, GL_FLOAT, GL_FALSE, 24, 0)
+  @vao.set_array_pointer(1, 3, GL_FLOAT, GL_FALSE, 24, 12)
 
 
   uva_vbo = Drawing::VBO.new(:vertex)
   uva_vbo.bind
   uva_vbo.data(landscape.uva_data)
-  vao.set_array_pointer(2, 1, GL_FLOAT, GL_FALSE, 0, 0)
+  @vao.set_array_pointer(2, 1, GL_FLOAT, GL_FALSE, 0, 0)
 
   vbocolor = Drawing::VBO.new(:vertex)
   vbocolor.bind
   vbocolor.data(landscape.colors_data)
-  vao.set_array_pointer(3, 3, GL_FLOAT, GL_FALSE, 0, 0)
+  @vao.set_array_pointer(3, 3, GL_FLOAT, GL_FALSE, 0, 0)
 
   vbo2 = Drawing::VBO.new(:index)
   vbo2.bind

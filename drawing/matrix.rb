@@ -58,6 +58,22 @@ module Drawing
 
         Drawing::Matrix[[*s, 0.0],[*u, 0.0],[*f, 0.0],[0.0,0.0,0.0,1.0]].translate(*eye)
       end
+
+      def ortho2d(left, right, bottom, top)
+        a1 = 2 / (right - left)
+        a2 = 2 / (top - bottom)
+        a3 = -1
+        tx = -(right + left) / (right - left)
+        ty = -(top + bottom) / (top - bottom)
+        tz = 0
+
+        Drawing::Matrix[
+          [a1, 0.0, 0.0, tx],
+          [0.0, a2, 0.0, ty],
+          [0.0, 0.0, a3, tz],
+          [0.0, 0.0, 0.0, 1.0]
+        ]
+      end
     end
   end
 end

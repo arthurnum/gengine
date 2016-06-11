@@ -62,5 +62,16 @@ module GLSL
             out_color = out_color * lightColor * max(angle, 0.1);
           }
         )
+
+      FRAGMENT_SHADER_ORTHO2D = %q(
+        #version 330 core
+
+        out vec4 out_color;
+
+        void main()
+        {
+          out_color = vec4(1.0, 0.2, 0.4, 1.0);
+        }
+      )
   end
 end
