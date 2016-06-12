@@ -82,6 +82,13 @@ module Drawing
         end
 
         @indices = generate_indices(dim)
+
+        build_gl_objects
+      end
+
+      def draw
+        @vao.bind
+        glDrawElements(GL_TRIANGLE_STRIP, size, GL_UNSIGNED_INT, 0)
       end
 
       def vertices_data
@@ -171,6 +178,21 @@ module Drawing
         touch_faces.uniq.each(&:reset_normal)
       end
 
+      def update_supervbo
+        @supervbo.bind
+        @supervbo.data(vn_data)
+      end
+
+      def update_colorvbo
+        @vbocolor.bind
+        @vbocolor.data(colors_data)
+      end
+
+      def update_uvavbo
+        @uva_vbo.bind
+        @uva_vbo.data(uva_data)
+      end
+
       private
 
       def generate_vertex(row, column)
@@ -207,6 +229,32 @@ module Drawing
         end
         result << i if right
         result
+      end
+
+      def build_gl_objects
+        @vao = Drawing::VAO.new
+        @vao.bind
+
+        @supervbo = Drawing::VBO.new(:vertex)
+        @supervbo.bind
+        @supervbo.data(vn_data)
+        @vao.set_array_pointer(0, 3, GL_FLOAT, GL_FALSE, 24, 0)
+        @vao.set_array_pointer(1, 3, GL_FLOAT, GL_FALSE, 24, 12)
+
+
+        @uva_vbo = Drawing::VBO.new(:vertex)
+        @uva_vbo.bind
+        @uva_vbo.data(uva_data)
+        @vao.set_array_pointer(2, 1, GL_FLOAT, GL_FALSE, 0, 0)
+
+        @vbocolor = Drawing::VBO.new(:vertex)
+        @vbocolor.bind
+        @vbocolor.data(colors_data)
+        @vao.set_array_pointer(3, 3, GL_FLOAT, GL_FALSE, 0, 0)
+
+        @vbo2 = Drawing::VBO.new(:index)
+        @vbo2.bind
+        @vbo2.data(indices_data)
       end
     end
   end

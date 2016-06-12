@@ -4,10 +4,10 @@ module Drawing
 
       def initialize
         @vertices = [
-          Vertex.new(0.0, 0.0, 0.0),
-          Vertex.new(0.5, 0.0, 0.0),
-          Vertex.new(0.0, 0.5, 0.0),
-          Vertex.new(0.5, 0.5, 0.0)
+          Vertex.new(10.0, 10.0, 1.0),
+          Vertex.new(110.0, 10.0, 1.0),
+          Vertex.new(10.0, 110.0, 1.0),
+          Vertex.new(110.0, 110.0, 1.0)
         ]
 
         @indices = [0, 1, 2, 3]

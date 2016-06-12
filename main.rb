@@ -22,9 +22,7 @@ def render
 
   @program.use
   @program.uniform_matrix4(@world.matrix.world, 'MVP')
-
-  @vao.bind
-  glDrawElements(GL_TRIANGLE_STRIP, @count, GL_UNSIGNED_INT, 0)
+  @landscape.draw
 
   @program_ortho2d.use
   @program_ortho2d.uniform_matrix4(@mart, 'MVP')
@@ -83,37 +81,11 @@ fragment_ortho2d_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_ORTH
 
   @program.uniform_1i("texture2", 1)
 
-  landscape = Drawing::Object::Landscape.new(50)
+  @landscape = Drawing::Object::Landscape.new(50)
   @rect = Drawing::Object::Rectangle.new
-  @mart = Drawing::Matrix.ortho2d(0.0, 1.0, 0.0, 1.0)
+  @mart = Drawing::Matrix.ortho2d(0.0, window.width, 0.0, window.height)
 
-
-  @vao = Drawing::VAO.new
-  @vao.bind
-
-  supervbo = Drawing::VBO.new(:vertex)
-  supervbo.bind
-  supervbo.data(landscape.vn_data)
-  @vao.set_array_pointer(0, 3, GL_FLOAT, GL_FALSE, 24, 0)
-  @vao.set_array_pointer(1, 3, GL_FLOAT, GL_FALSE, 24, 12)
-
-
-  uva_vbo = Drawing::VBO.new(:vertex)
-  uva_vbo.bind
-  uva_vbo.data(landscape.uva_data)
-  @vao.set_array_pointer(2, 1, GL_FLOAT, GL_FALSE, 0, 0)
-
-  vbocolor = Drawing::VBO.new(:vertex)
-  vbocolor.bind
-  vbocolor.data(landscape.colors_data)
-  @vao.set_array_pointer(3, 3, GL_FLOAT, GL_FALSE, 0, 0)
-
-  vbo2 = Drawing::VBO.new(:index)
-  vbo2.bind
-  vbo2.data(landscape.indices_data)
-
-  @count = landscape.size
-  puts "Landscape size: #{@count}"
+  puts "Landscape size: #{@landscape.size}"
 
 focus_array = []
 
@@ -125,49 +97,46 @@ constructor = Context::Constructor.new(window, @world)
 
 h_edit_face = lambda do |win, ev|
   if ev.scancode == SDL2::Key::Scan::UP
-    landscape.up!(constructor.shift_radius)
+    @landscape.up!(constructor.shift_radius)
     touch_supervbo = true
   end
 
   if ev.scancode == SDL2::Key::Scan::DOWN
-    landscape.down!(constructor.shift_radius)
+    @landscape.down!(constructor.shift_radius)
     touch_supervbo = true
   end
 end
 
 h_apply_texture = lambda do |win, ev|
   if ev.scancode == SDL2::Key::Scan::LEFT
-    landscape.focus_array.each do |face|
+    @landscape.focus_array.each do |face|
       face.each_vertex do |v|
         v.uva -= 0.1
         v.uva = 0.0 if v.uva < 0.0
       end
     end
 
-    uva_vbo.bind
-    uva_vbo.data(landscape.uva_data)
+    @landscape.update_uvavbo
   end
 
   if ev.scancode == SDL2::Key::Scan::RIGHT
-    landscape.focus_array.each do |face|
+    @landscape.focus_array.each do |face|
       face.each_vertex do |v|
         v.uva += 0.1
         v.uva = 1.0 if v.uva > 1.0
       end
     end
 
-    uva_vbo.bind
-    uva_vbo.data(landscape.uva_data)
+    @landscape.update_uvavbo
   end
 end
 
 h_mouse_down = lambda do |win, ev|
   ray = Calculating::Ray.new
   ray.trace(@world.matrix.world, window.width, window.height, ev.x, window.height - ev.y)
-  landscape.ray_intersect(ray)
+  @landscape.ray_intersect(ray)
 
-  vbocolor.bind
-  vbocolor.data(landscape.colors_data)
+  @landscape.update_colorvbo
 end
 
 window.register_event_handler(:key_down, h_edit_face)
@@ -184,8 +153,7 @@ loop do
   window.gl_swap
 
   if touch_supervbo
-    supervbo.bind
-    supervbo.data(landscape.vn_data)
+    @landscape.update_supervbo
     touch_supervbo = false
   end
 
