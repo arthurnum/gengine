@@ -20,13 +20,28 @@ touch_supervbo = false
 def render
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
+  glActiveTexture(GL_TEXTURE0)
+  @texture1.bind
+  glActiveTexture(GL_TEXTURE1)
+  @texture2.bind
   @program.use
+  @program.uniform_1i("texture1", 0)
+  @program.uniform_1i("texture2", 1)
   @program.uniform_matrix4(@world.matrix.world, 'MVP')
   @landscape.draw
 
   @program_ortho2d.use
   @program_ortho2d.uniform_matrix4(@mart, 'MVP')
+
+  glActiveTexture(GL_TEXTURE0)
+  @texture1.bind
+  @program_ortho2d.uniform_1i("texture1", 0)
   @rect.draw
+
+  glActiveTexture(GL_TEXTURE0)
+  @texture2.bind
+  @program_ortho2d.uniform_1i("texture1", 0)
+  @rect2.draw
 end
 
 SDL2.init(SDL2::INIT_EVERYTHING)
@@ -36,7 +51,7 @@ SDL2::GL.set_attribute(SDL2::GL::CONTEXT_MINOR_VERSION, 3)
 SDL2::GL.set_attribute(SDL2::GL::CONTEXT_PROFILE_MASK, SDL2::GL::CONTEXT_PROFILE_CORE)
 
 # You need to create a window with `OPENGL' flag
-window = Context::Window.new(1368.0, 768.0)
+window = Context::Window.new(1920.0, 1080.0)
 
 # Create a OpenGL context attached to the window
 context = SDL2::GL::Context.create(window.sdl_window)
@@ -47,6 +62,7 @@ glEnable(GL_DEPTH_TEST)
 
 vertex_shader = Shader.new(:vertex, Collection::VERTEX_SHADER_S3)
 fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S3)
+vertex_ortho2d_shader = Shader.new(:vertex, Collection::VERTEX_SHADER_ORTHO2D)
 fragment_ortho2d_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_ORTHO2D)
 
 @program = Program.new
@@ -54,12 +70,11 @@ fragment_ortho2d_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_ORTH
 @program.link_and_use
 
 @program_ortho2d = Program.new
-@program_ortho2d.attach_shaders(vertex_shader, fragment_ortho2d_shader)
+@program_ortho2d.attach_shaders(vertex_ortho2d_shader, fragment_ortho2d_shader)
 @program_ortho2d.link
 
 @world.camera = Drawing::Camera.new(Vector[0.0, 3.0, -10.0], 0.0)
 @world.matrix.projection = Drawing::Matrix.perspective(65, window.width, window.height, 0.1, 1000.0)
-# @world.matrix.view = Drawing::Matrix.look_at(Vector[0.0, 20.0, -20.0], Vector[100.0, 0.0, 50.0], Vector[0.0, 1.0, 0.0])
 @world.matrix.view = @world.camera.view
 @world.matrix.model = Drawing::Matrix.identity(4)
 
@@ -68,21 +83,22 @@ fragment_ortho2d_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_ORTH
 
 
   glActiveTexture(GL_TEXTURE0)
-  texture1 = Drawing::Texture.new
-  texture1.bind
-  texture1.load("./textures/ccw.bmp")
+  @texture1 = Drawing::Texture.new
+  @texture1.bind
+  @texture1.load("./textures/ccw.bmp")
 
   @program.uniform_1i("texture1", 0)
 
   glActiveTexture(GL_TEXTURE1)
-  texture2 = Drawing::Texture.new
-  texture2.bind
-  texture2.load("./textures/mf.bmp")
+  @texture2 = Drawing::Texture.new
+  @texture2.bind
+  @texture2.load("./textures/mf.bmp")
 
   @program.uniform_1i("texture2", 1)
 
   @landscape = Drawing::Object::Landscape.new(50)
-  @rect = Drawing::Object::Rectangle.new
+  @rect = Drawing::Object::Rectangle.new(10.0, 10.0, 100.0, 100.0)
+  @rect2 = Drawing::Object::Rectangle.new(10.0, 120.0, 100.0, 100.0)
   @mart = Drawing::Matrix.ortho2d(0.0, window.width, 0.0, window.height)
 
   puts "Landscape size: #{@landscape.size}"

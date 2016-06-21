@@ -63,14 +63,34 @@ module GLSL
           }
         )
 
+      VERTEX_SHADER_ORTHO2D = %q(
+          #version 330 core
+          layout(location=0) in vec3 pos;
+          layout(location=1) in vec2 uva;
+          uniform mat4 MVP;
+
+          out vec2 fragUVA;
+
+          void main()
+          {
+            fragUVA = uva;
+
+            gl_Position = MVP * vec4(pos, 1.0);
+          }
+        )
+
       FRAGMENT_SHADER_ORTHO2D = %q(
         #version 330 core
 
+        in vec2 fragUVA;
+
         out vec4 out_color;
+
+        uniform sampler2D texture1;
 
         void main()
         {
-          out_color = vec4(1.0, 0.2, 0.4, 1.0);
+          out_color = texture(texture1, fragUVA).rgba;
         }
       )
   end

@@ -2,12 +2,19 @@ module Drawing
   module Object
     class Rectangle
 
-      def initialize
+      def initialize(x, y, w, h)
         @vertices = [
-          Vertex.new(10.0, 10.0, 1.0),
-          Vertex.new(110.0, 10.0, 1.0),
-          Vertex.new(10.0, 110.0, 1.0),
-          Vertex.new(110.0, 110.0, 1.0)
+          Vertex.new(x, y, 1.0),
+          Vertex.new(x + w, y, 1.0),
+          Vertex.new(x, y + h, 1.0),
+          Vertex.new(x + w, y + h, 1.0)
+        ]
+
+        @uva = [
+          0.0, 0.0,
+          1.0, 0.0,
+          0.0, 1.0,
+          1.0, 1.0
         ]
 
         @indices = [0, 1, 2, 3]
@@ -20,6 +27,11 @@ module Drawing
         @vbo.data(vertices_data)
         @vao.set_array_pointer(0, 3, GL_FLOAT, GL_FALSE, 12, 0)
 
+        @vbo_uva = Drawing::VBO.new(:vertex)
+        @vbo_uva.bind
+        @vbo_uva.data(uva_data)
+        @vao.set_array_pointer(1, 2, GL_FLOAT, GL_FALSE, 8, 0)
+
         @vbo2 = Drawing::VBO.new(:index)
         @vbo2.bind
         @vbo2.data(indices_data)
@@ -29,6 +41,10 @@ module Drawing
         data = []
         @vertices.each { |v| data.concat v.vector.to_a }
         Data::Float.new(data)
+      end
+
+      def uva_data
+        Data::Float.new(@uva)
       end
 
       def indices_data
