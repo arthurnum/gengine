@@ -22,6 +22,7 @@ module Context
 
       @events = {
         key_down: Event.new,
+        key_up: Event.new,
         window: Event.new,
         mouse_button_down: Event.new,
         mouse_button_up: Event.new,
@@ -63,6 +64,10 @@ module Context
       while ev = SDL2::Event.poll
         if SDL2::Event::KeyDown === ev
           @events[:key_down].trigger(self, ev)
+        end
+
+        if SDL2::Event::KeyUp === ev
+          @events[:key_up].trigger(self, ev)
         end
 
         if SDL2::Event::Window === ev

@@ -21,5 +21,12 @@ module Drawing
     def model_mode?
       constructor.model_mode
     end
+
+    def update
+      if camera
+        camera.update
+        matrix.view = camera.view
+      end
+    end
   end
 end
