@@ -9,7 +9,7 @@ module Network
 
     def initialize
       @connection = UDPSocket.new
-      @connection.bind('127.0.0.1', SERVER_PORT)
+      @connection.bind(ARGV[0], SERVER_PORT)
       @queue = []
     end
 
