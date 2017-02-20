@@ -38,7 +38,7 @@ end
 
 Network::Server.new.start do |connection, msg, sender|
   packet = Network::Protocol.parse msg
-  puts packet.info
+  puts packet.username
   puts sender
   connection.send "hello", Socket::MSG_DONTWAIT, sender[2], sender[1]
 end
