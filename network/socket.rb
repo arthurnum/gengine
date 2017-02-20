@@ -8,7 +8,7 @@ conn = UDPSocket.new
 listener = Thread.new do
   begin
     msg = conn.recvfrom_nonblock(128)
-
+    puts msg
   rescue IO::WaitReadable => ex
     retry
   end while true

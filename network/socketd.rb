@@ -20,7 +20,8 @@ module Network
         begin
           next if @queue.empty?
 
-          yield @queue.shift
+          msg, sender = @queue.shift
+          yield @connection, msg, sender
         end while true
       end
     end
@@ -35,9 +36,11 @@ module Network
   end
 end
 
-Network::Server.new.start do |msg, sender|
+Network::Server.new.start do |connection, msg, sender|
   packet = Network::Protocol.parse msg
   puts packet.info
+  puts sender
+  connection.send "hello", Socket::MSG_DONTWAIT, sender[2], sender[1]
 end
 
 loop do end
