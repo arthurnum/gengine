@@ -63,6 +63,28 @@ module GLSL
           }
         )
 
+      VERTEX_SHADER_CUBE = %(
+        #version 330 core
+        layout(location=0) in vec3 pos;
+        uniform mat4 MVP;
+
+        void main()
+        {
+          gl_Position = MVP * vec4(pos, 1.0);
+        }
+      )
+
+      FRAGMENT_SHADER_CUBE = %(
+        #version 330 core
+
+        out vec4 out_color;
+
+        void main()
+        {
+          out_color = vec4(0.8, 0.6, 0.2, 1.0);
+        }
+      )
+
       VERTEX_SHADER_ORTHO2D = %q(
           #version 330 core
           layout(location=0) in vec3 pos;

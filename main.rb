@@ -30,6 +30,10 @@ def render
   @program.uniform_matrix4(@world.matrix.world, 'MVP')
   @landscape.draw
 
+  @program_cube.use
+  @program_cube.uniform_matrix4(@world.matrix.world, 'MVP')
+  @cube.draw
+
   @program_ortho2d.use
   @program_ortho2d.uniform_matrix4(@mart, 'MVP')
 
@@ -62,12 +66,18 @@ glEnable(GL_DEPTH_TEST)
 
 vertex_shader = Shader.new(:vertex, Collection::VERTEX_SHADER_S3)
 fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S3)
+vertex_cube_shader = Shader.new(:vertex, Collection::VERTEX_SHADER_CUBE)
+fragment_cube_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_CUBE)
 vertex_ortho2d_shader = Shader.new(:vertex, Collection::VERTEX_SHADER_ORTHO2D)
 fragment_ortho2d_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_ORTHO2D)
 
 @program = Program.new
 @program.attach_shaders(vertex_shader, fragment_shader)
 @program.link_and_use
+
+@program_cube = Program.new
+@program_cube.attach_shaders(vertex_cube_shader, fragment_cube_shader)
+@program_cube.link
 
 @program_ortho2d = Program.new
 @program_ortho2d.attach_shaders(vertex_ortho2d_shader, fragment_ortho2d_shader)
@@ -99,6 +109,7 @@ fragment_ortho2d_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_ORTH
   @landscape = Drawing::Object::Landscape.new(50)
   @rect = Drawing::Object::Rectangle.new(10.0, 10.0, 100.0, 100.0)
   @rect2 = Drawing::Object::Rectangle.new(10.0, 120.0, 100.0, 100.0)
+  @cube = Drawing::Object::Cube.new(0.0, 0.0, 0.0, 0.5)
   @mart = Drawing::Matrix.ortho2d(0.0, window.width, 0.0, window.height)
 
   puts "Landscape size: #{@landscape.size}"
