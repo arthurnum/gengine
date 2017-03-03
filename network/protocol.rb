@@ -80,6 +80,7 @@ module Network
 
       def initialize
         @code = Protocol::CUBE_RESPONSE
+        @vector = [0.0, 0.0, 0.0]
       end
 
       def self.unpack(msg)

@@ -1,23 +1,30 @@
 require 'socket'
-require 'pry'
 
 require_relative 'protocol'
 
-conn = UDPSocket.new
+module Network
+  class Client
+    def initialize(addr, obj_link)
+      @conn = UDPSocket.new
+      @packet = Network::Protocol::PacketCubeRequest.new
+      @addr = addr
+      @obj_link = obj_link
+    end
 
-listener = Thread.new do
-  begin
-    msg = conn.recvfrom_nonblock(128)
-    puts msg
-  rescue IO::WaitReadable => ex
-    retry
-  end while true
+    def read
+      msg, sender = @conn.recvfrom_nonblock(128)
+
+      rp = Network::Protocol.parse msg
+
+      if rp.is_a? Network::Protocol::PacketCubeResponse
+        @obj_link.position = Vector.elements(rp.vector)
+      end
+    rescue IO::WaitReadable => ex
+      #no block
+    end
+
+    def write
+      @conn.send @packet.pack, Socket::MSG_DONTWAIT, @addr, 45000
+    end
+  end
 end
-
-packet = Network::Protocol::PacketIn.new
-packet.username = "arthurnum"
-
-begin
-conn.send packet.pack, Socket::MSG_DONTWAIT, ARGV[0], 45000
-sleep 1
-end while true
