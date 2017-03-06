@@ -10,6 +10,7 @@ require_relative 'glsl/glsl'
 require_relative 'drawing/drawing'
 require_relative 'calculating/calculating'
 require_relative 'context/context'
+require_relative 'network/socket'
 
 include GLSL
 
@@ -31,7 +32,8 @@ def render
   @landscape.draw
 
   @program_cube.use
-  @program_cube.uniform_matrix4(@world.matrix.world, 'MVP')
+  cube_matrix = @world.matrix.world.translate(@cube.x, @cube.y, @cube.z)
+  @program_cube.uniform_matrix4(cube_matrix, 'MVP')
   @cube.draw
 
   @program_ortho2d.use
@@ -110,6 +112,7 @@ fragment_ortho2d_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_ORTH
   @rect = Drawing::Object::Rectangle.new(10.0, 10.0, 100.0, 100.0)
   @rect2 = Drawing::Object::Rectangle.new(10.0, 120.0, 100.0, 100.0)
   @cube = Drawing::Object::Cube.new(0.0, 0.0, 0.0, 0.5)
+  @cube.position = Vector[0.0, 2.0, 4.0]
   @mart = Drawing::Matrix.ortho2d(0.0, window.width, 0.0, window.height)
 
   puts "Landscape size: #{@landscape.size}"
@@ -170,8 +173,13 @@ window.register_event_handler(:key_down, h_edit_face)
 window.register_event_handler(:key_down, h_apply_texture)
 window.register_event_handler(:mouse_button_down, h_mouse_down)
 
+network = Network::Client.new(ARGV[0], @cube)
+network.write
+
 # You can use OpenGL functions
 loop do
+  network.read
+
   render
 
   window.events_poll
@@ -183,6 +191,8 @@ loop do
     @landscape.update_supervbo
     touch_supervbo = false
   end
+
+  network.write
 
   frames += 1.0
   time_b = Time.now

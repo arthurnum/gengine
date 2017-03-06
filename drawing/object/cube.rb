@@ -1,8 +1,11 @@
 module Drawing
   module Object
     class Cube
+      attr_accessor :position
 
       def initialize(x, y, z, w)
+        @position = Vector[0.0, 0.0, 0.0]
+
         @vertices = [
           Vertex.new(x + w, y + w, z + w),
           Vertex.new(x - w, y + w, z + w),
@@ -48,6 +51,18 @@ module Drawing
       def draw
         @vao.bind
         glDrawElements(GL_TRIANGLE_STRIP, 14, GL_UNSIGNED_INT, 0)
+      end
+
+      def x
+        @position[0]
+      end
+
+      def y
+        @position[1]
+      end
+
+      def z
+        @position[2]
       end
 
     end
