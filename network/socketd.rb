@@ -18,7 +18,8 @@ module Network
           msg, sender = @connection.recvfrom_nonblock(128)
           yield @connection, msg, sender
         rescue IO::WaitReadable => ex
-          # no block
+          # save CPU time
+          sleep 0.1
         end while true
       end.join
     end
