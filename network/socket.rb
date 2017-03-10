@@ -9,6 +9,7 @@ module Network
       @packet = Network::Protocol::PacketCubeRequest.new
       @addr = addr
       @obj_link = obj_link
+      @dest = Socket.sockaddr_in(45000, addr)
     end
 
     def read
@@ -24,7 +25,7 @@ module Network
     end
 
     def write
-      @conn.send @packet.pack, Socket::MSG_DONTWAIT, @addr, 45000
+      @conn.send @packet.pack, Socket::MSG_DONTWAIT, @dest
     end
   end
 end
