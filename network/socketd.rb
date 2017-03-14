@@ -13,24 +13,16 @@ module Network
     end
 
     def start
-      listener_thr = Thread.new { loop do listen end }
-
       worker_thr = Thread.new do
         begin
-          next if @queue.empty?
-
-          msg, sender = @queue.shift
+          msg, sender = @connection.recvfrom_nonblock(128)
           yield @connection, msg, sender
+        rescue IO::WaitReadable => ex
+          # save CPU time
+          sleep 0.1
         end while true
-      end
+      end.join
     end
 
-    private
-
-    def listen
-      @queue.push @connection.recvfrom_nonblock(128) if @queue.size < 10
-    rescue IO::WaitReadable => ex
-      # no block
-    end
   end
 end

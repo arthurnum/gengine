@@ -4,18 +4,26 @@ module Network
     VERSION = '0.01'.freeze
     HEADER = "GDP #{VERSION}".freeze
 
+    SPLITSTR = 'PCK'
+
     IN = 1
     CUBE_REQUEST = 2
     CUBE_RESPONSE = 3
+    CAMERA = 4
+    CAMERA_UNIQ = 5
 
     CODE_TO_PACKET = {
       IN => "Network::Protocol::PacketIn",
       CUBE_REQUEST => "Network::Protocol::PacketCubeRequest",
-      CUBE_RESPONSE => "Network::Protocol::PacketCubeResponse"
+      CUBE_RESPONSE => "Network::Protocol::PacketCubeResponse",
+      CAMERA => "Network::Protocol::PacketCamera",
+      CAMERA_UNIQ => "Network::Protocol::PacketCameraUniq",
     }
 
     def self.parse(msg)
       code = msg.unpack("c")[0]
+
+      return unless code
 
       Object.const_get(CODE_TO_PACKET[code]).unpack(msg)
     end
@@ -93,6 +101,62 @@ module Network
       def pack
         data = [@code] + vector
         data.pack DATA_FORMAT
+      end
+    end
+
+    ############
+    # PacketCamera
+    #
+    #
+    class PacketCamera
+      DATA_FORMAT = "c d*"
+
+      attr_accessor :vector
+
+      def initialize
+        @code = Protocol::CAMERA
+        @vector = [0.0, 0.0, 0.0]
+      end
+
+      def self.unpack(msg)
+        data = msg.unpack(DATA_FORMAT)
+        packet = self.new
+        packet.vector = data[1..-1]
+        packet
+      end
+
+      def pack
+        data = [@code] + vector
+        data.pack DATA_FORMAT
+      end
+    end
+
+    ############
+    # PacketCameraUniq
+    #
+    #
+    class PacketCameraUniq
+      DATA_FORMAT = "c A24 d*"
+
+      attr_accessor :id, :vector
+
+      def initialize
+        @code = Protocol::CAMERA_UNIQ
+      end
+
+      def self.unpack(msg)
+        data = msg.unpack(DATA_FORMAT)
+        packet = self.new
+        packet.id = data[1]
+        packet.vector = data[2..-1]
+        packet
+      end
+
+      def pack
+        data = [@code]
+        data << "%-24s" % @id
+        data << @vector
+        data.flatten.pack DATA_FORMAT
       end
     end
   end

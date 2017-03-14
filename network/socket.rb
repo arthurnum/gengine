@@ -15,17 +15,25 @@ module Network
     def read
       msg, sender = @conn.recvfrom_nonblock(128)
 
-      rp = Network::Protocol.parse msg
+      msg.split(Network::Protocol::SPLITSTR).each do |pck|
 
-      if rp.is_a? Network::Protocol::PacketCubeResponse
-        @obj_link.position = Vector.elements(rp.vector)
+        rp = Network::Protocol.parse pck
+
+        if rp.is_a? Network::Protocol::PacketCameraUniq
+          @obj_link[rp.id] ||= Drawing::Object::Cube.new(0.0, 0.0, 0.0, 0.5)
+          @obj_link[rp.id].position = Vector.elements(rp.vector)
+        end
+
       end
+
     rescue IO::WaitReadable => ex
       #no block
     end
 
-    def write
-      @conn.send @packet.pack, Socket::MSG_DONTWAIT, @dest
+    def write(packets)
+      packets.each do |packet|
+        @conn.send packet.pack, Socket::MSG_DONTWAIT, @dest
+      end
     end
   end
 end

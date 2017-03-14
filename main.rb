@@ -32,9 +32,11 @@ def render
   @landscape.draw
 
   @program_cube.use
-  cube_matrix = @world.matrix.world.translate(@cube.x, @cube.y, @cube.z)
-  @program_cube.uniform_matrix4(cube_matrix, 'MVP')
-  @cube.draw
+  @cubes.each do |k, cube|
+    cube_matrix = @world.matrix.world.translate(cube.x, cube.y, cube.z)
+    @program_cube.uniform_matrix4(cube_matrix, 'MVP')
+    cube.draw
+  end
 
   @program_ortho2d.use
   @program_ortho2d.uniform_matrix4(@mart, 'MVP')
@@ -57,7 +59,7 @@ SDL2::GL.set_attribute(SDL2::GL::CONTEXT_MINOR_VERSION, 3)
 SDL2::GL.set_attribute(SDL2::GL::CONTEXT_PROFILE_MASK, SDL2::GL::CONTEXT_PROFILE_CORE)
 
 # You need to create a window with `OPENGL' flag
-window = Context::Window.new(1920.0, 1080.0)
+window = Context::Window.new(600.0, 480.0)
 
 # Create a OpenGL context attached to the window
 context = SDL2::GL::Context.create(window.sdl_window)
@@ -111,9 +113,8 @@ fragment_ortho2d_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_ORTH
   @landscape = Drawing::Object::Landscape.new(50)
   @rect = Drawing::Object::Rectangle.new(10.0, 10.0, 100.0, 100.0)
   @rect2 = Drawing::Object::Rectangle.new(10.0, 120.0, 100.0, 100.0)
-  @cube = Drawing::Object::Cube.new(0.0, 0.0, 0.0, 0.5)
-  @cube.position = Vector[0.0, 2.0, 4.0]
   @mart = Drawing::Matrix.ortho2d(0.0, window.width, 0.0, window.height)
+  @cubes = {}
 
   puts "Landscape size: #{@landscape.size}"
 
@@ -173,8 +174,10 @@ window.register_event_handler(:key_down, h_edit_face)
 window.register_event_handler(:key_down, h_apply_texture)
 window.register_event_handler(:mouse_button_down, h_mouse_down)
 
-network = Network::Client.new(ARGV[0], @cube)
-network.write
+network = Network::Client.new(ARGV[0], @cubes)
+pp = Network::Protocol::PacketCamera.new
+pp.vector = @world.camera.position.to_a
+network.write [pp]
 
 # You can use OpenGL functions
 loop do
@@ -192,7 +195,8 @@ loop do
     touch_supervbo = false
   end
 
-  network.write
+  pp.vector = @world.camera.position.to_a
+  network.write [pp]
 
   frames += 1.0
   time_b = Time.now
