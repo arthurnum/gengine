@@ -77,7 +77,7 @@ module GLSL
           fragUVA = uva;
 
           vec4 wave = texture(texture1, uva);
-          float s11 = wave.x * 45 - 20;
+          float s11 = wave.z * 50;
 
           gl_Position = MVP * vec4(pos.x, s11, pos.z, 1.0);
         }
@@ -113,10 +113,10 @@ module GLSL
 
             vec3 fn = normalize(fn11+fn01+fn21+fn10+fn12+fn00+fn20+fn02+fn22);
 
-            vec3 lightNormal = normalize(vec3(0.0, 1.0, 1.0));
-            float angle = dot(fn.xyz, lightNormal);
+            vec3 lightNormal = normalize(vec3(0.0, 1.0, 0.0));
+            float angle = dot(fn.xzy, lightNormal);
             vec4 lightColor = vec4(1.0, 0.9, 0.9, 1.0);
-            vec2 uva = fragUVA * 40;
+            vec2 uva = fragUVA * 60;
 
             out_color = texture(texture3, uva) * lightColor * max(angle, 0.4);
           }

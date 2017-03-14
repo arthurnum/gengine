@@ -24,8 +24,8 @@ module Drawing
         ###
         @uva_data = []
         @vertices.each do |vert|
-          @uva_data << vert.x / dim.to_f + 0.01
-          @uva_data << vert.z / dim.to_f + 0.01
+          @uva_data << vert.x / dim.to_f + 0.0
+          @uva_data << 1.0 - vert.z / dim.to_f + 0.0
         end
 
         @indices = generate_indices(dim)
