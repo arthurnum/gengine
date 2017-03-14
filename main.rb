@@ -22,14 +22,18 @@ def render
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
   glActiveTexture(GL_TEXTURE0)
-  @texture1.bind
+  @texture4.bind
   glActiveTexture(GL_TEXTURE1)
-  @texture2.bind
-  @program.use
-  @program.uniform_1i("texture1", 0)
-  @program.uniform_1i("texture2", 1)
-  @program.uniform_matrix4(@world.matrix.world, 'MVP')
-  @landscape.draw
+  @texture5.bind
+  glActiveTexture(GL_TEXTURE2)
+  @texture1.bind
+  @program4.use
+  @program4.uniform_1i("texture1", 0)
+  @program4.uniform_1i("texture2", 1)
+  @program4.uniform_1i("texture3", 2)
+  @program4.uniform_1i("texture4", 3)
+  @program4.uniform_matrix4(@world.matrix.world, 'MVP')
+  @landscape4.draw
 
   @program_cube.use
   @cubes.each do |k, cube|
@@ -70,14 +74,16 @@ glEnable(GL_DEPTH_TEST)
 
 vertex_shader = Shader.new(:vertex, Collection::VERTEX_SHADER_S3)
 fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S3)
+vertex_shader4 = Shader.new(:vertex, Collection::VERTEX_SHADER_S4)
+fragment_shader4 = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S4)
 vertex_cube_shader = Shader.new(:vertex, Collection::VERTEX_SHADER_CUBE)
 fragment_cube_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_CUBE)
 vertex_ortho2d_shader = Shader.new(:vertex, Collection::VERTEX_SHADER_ORTHO2D)
 fragment_ortho2d_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_ORTHO2D)
 
-@program = Program.new
-@program.attach_shaders(vertex_shader, fragment_shader)
-@program.link_and_use
+@program4 = Program.new
+@program4.attach_shaders(vertex_shader4, fragment_shader4)
+@program4.link
 
 @program_cube = Program.new
 @program_cube.attach_shaders(vertex_cube_shader, fragment_cube_shader)
@@ -92,31 +98,30 @@ fragment_ortho2d_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_ORTH
 @world.matrix.view = @world.camera.view
 @world.matrix.model = Drawing::Matrix.identity(4)
 
-@program.uniform_matrix4(@world.matrix.world, 'MVP')
-@program.uniform_vector2fv(Vector[0.0, 0.0], 'texture_center')
-
-
-  glActiveTexture(GL_TEXTURE0)
   @texture1 = Drawing::Texture.new
   @texture1.bind
   @texture1.load("./textures/ccw.bmp")
 
-  @program.uniform_1i("texture1", 0)
-
-  glActiveTexture(GL_TEXTURE1)
   @texture2 = Drawing::Texture.new
   @texture2.bind
   @texture2.load("./textures/mf.bmp")
 
-  @program.uniform_1i("texture2", 1)
+  @texture4 = Drawing::Texture.new
+  @texture4.bind
+  @texture4.load("./textures/Rivwide.bmp")
 
-  @landscape = Drawing::Object::Landscape.new(50)
+  @texture5 = Drawing::Texture.new
+  @texture5.bind
+  @texture5.load("./textures/normalm.bmp")
+
+  @landscape = Drawing::Object::Landscape.new(10)
+  @landscape4 = Drawing::Object::Landscape2.new(350)
   @rect = Drawing::Object::Rectangle.new(10.0, 10.0, 100.0, 100.0)
   @rect2 = Drawing::Object::Rectangle.new(10.0, 120.0, 100.0, 100.0)
   @mart = Drawing::Matrix.ortho2d(0.0, window.width, 0.0, window.height)
   @cubes = {}
 
-  puts "Landscape size: #{@landscape.size}"
+  # puts "Landscape size: #{@landscape.size}"
 
 focus_array = []
 

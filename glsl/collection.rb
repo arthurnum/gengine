@@ -63,6 +63,65 @@ module GLSL
           }
         )
 
+    VERTEX_SHADER_S4 = %q(
+      #version 330 core
+        layout(location=0) in vec3 pos;
+        layout(location=1) in vec2 uva;
+        uniform mat4 MVP;
+        uniform sampler2D texture1;
+
+        out vec2 fragUVA;
+
+        void main()
+        {
+          fragUVA = uva;
+
+          vec4 wave = texture(texture1, uva);
+          float s11 = wave.x * 45 - 20;
+
+          gl_Position = MVP * vec4(pos.x, s11, pos.z, 1.0);
+        }
+      )
+
+      FRAGMENT_SHADER_S4 = %q(
+          #version 330 core
+
+          uniform sampler2D texture1;
+          uniform sampler2D texture2;
+          uniform sampler2D texture3;
+
+          in vec2 fragUVA;
+
+          out vec4 out_color;
+
+          vec4 outputColor1;
+
+          const ivec3 off = ivec3(-1, 0, 1);
+
+          void main()
+          {
+            vec3 fn11 = texture(texture2, fragUVA).xyz;
+            vec3 fn01 = textureOffset(texture2, fragUVA, off.xy).xyz;
+            vec3 fn21 = textureOffset(texture2, fragUVA, off.zy).xyz;
+            vec3 fn10 = textureOffset(texture2, fragUVA, off.yx).xyz;
+            vec3 fn12 = textureOffset(texture2, fragUVA, off.yz).xyz;
+
+            vec3 fn00 = textureOffset(texture2, fragUVA, off.xx).xyz;
+            vec3 fn20 = textureOffset(texture2, fragUVA, off.zx).xyz;
+            vec3 fn02 = textureOffset(texture2, fragUVA, off.xz).xyz;
+            vec3 fn22 = textureOffset(texture2, fragUVA, off.zz).xyz;
+
+            vec3 fn = normalize(fn11+fn01+fn21+fn10+fn12+fn00+fn20+fn02+fn22);
+
+            vec3 lightNormal = normalize(vec3(0.0, 1.0, 1.0));
+            float angle = dot(fn.xyz, lightNormal);
+            vec4 lightColor = vec4(1.0, 0.9, 0.9, 1.0);
+            vec2 uva = fragUVA * 40;
+
+            out_color = texture(texture3, uva) * lightColor * max(angle, 0.4);
+          }
+        )
+
       VERTEX_SHADER_CUBE = %(
         #version 330 core
         layout(location=0) in vec3 pos;
