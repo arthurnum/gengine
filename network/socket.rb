@@ -21,7 +21,7 @@ module Network
 
         if rp.is_a? Network::Protocol::PacketCameraUniq
           @obj_link[rp.id] ||= Drawing::Object::Cube.new(0.0, 0.0, 0.0, 0.5)
-          @obj_link[rp.id].position = Vector.elements(rp.vector)
+          @obj_link[rp.id].position = Vector.elements(rp.vector) + Vector[0.0, -1.5, 0.0]
         end
 
       end

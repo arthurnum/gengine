@@ -93,7 +93,8 @@ fragment_ortho2d_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_ORTH
 @program_ortho2d.attach_shaders(vertex_ortho2d_shader, fragment_ortho2d_shader)
 @program_ortho2d.link
 
-@world.camera = Drawing::Camera.new(Vector[0.0, 3.0, -10.0], 0.0)
+# @world.camera = Drawing::Camera.new(Vector[0.0, 3.0, -10.0], 0.0)
+@world.camera = Drawing::Camera.new(Vector[0.0, 0.0, 0.0], 0.0)
 @world.matrix.projection = Drawing::Matrix.perspective(65, window.width, window.height, 0.1, 1000.0)
 @world.matrix.view = @world.camera.view
 @world.matrix.model = Drawing::Matrix.identity(4)
@@ -108,7 +109,9 @@ fragment_ortho2d_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_ORTH
 
   @texture4 = Drawing::Texture.new
   @texture4.bind
-  @texture4.load("./textures/Rivwide.bmp")
+  @rawh = @texture4.load("./textures/Rivwide.bmp")
+  @rawh = @rawh.unpack "C*"
+  @world.camera.height_data = 0.step(@rawh.size - 1, 3).map { |i| @rawh[i] }
 
   @texture5 = Drawing::Texture.new
   @texture5.bind
