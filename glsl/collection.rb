@@ -89,6 +89,9 @@ module GLSL
           uniform sampler2D texture1;
           uniform sampler2D texture2;
           uniform sampler2D texture3;
+          uniform sampler2D texture4;
+          uniform mat4 ModelView;
+          uniform mat4 NormalView;
 
           in vec2 fragUVA;
 
@@ -112,13 +115,22 @@ module GLSL
             vec3 fn22 = textureOffset(texture2, fragUVA, off.zz).xyz;
 
             vec3 fn = normalize(fn11+fn01+fn21+fn10+fn12+fn00+fn20+fn02+fn22);
+            vec4 fneye = NormalView * vec4(fn.xzy, 0.0);
+
+            vec4 r = reflect(normalize(vec4(0.0, 1.0, 0.0, 0.0)), fneye);
+            vec4 eyeCord = ModelView * vec4(fn.xzy, 0.0);
+            vec4 v = normalize(-eyeCord);
+            float spec = max( dot(v,r), 0.0 );
+            vec4 specColor = pow(spec, 4) * vec4(1,1,1,1) * 0.5;
 
             vec3 lightNormal = normalize(vec3(0.0, 1.0, 0.0));
             float angle = dot(fn.xzy, lightNormal);
-            vec4 lightColor = vec4(1.0, 0.9, 0.9, 1.0);
-            vec2 uva = fragUVA * 60;
+            vec4 lightColor = vec4(1.0, 1.0, 1.0, 1.0);
+            vec2 uva = fragUVA * 40;
+            vec4 abyr = texture(texture3, uva).rgba * fn.z + texture(texture4, uva).rgba * (1.0 - fn.z);
 
-            out_color = texture(texture3, uva) * lightColor * max(angle, 0.4);
+            // out_color = texture(texture3, uva) * lightColor * max(angle, 0.4);
+            out_color = abyr * lightColor * max(angle, 0.5) + specColor;
           }
         )
 

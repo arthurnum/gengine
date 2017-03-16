@@ -27,12 +27,18 @@ def render
   @texture5.bind
   glActiveTexture(GL_TEXTURE2)
   @texture1.bind
+  glActiveTexture(GL_TEXTURE3)
+  @texture2.bind
   @program4.use
   @program4.uniform_1i("texture1", 0)
   @program4.uniform_1i("texture2", 1)
   @program4.uniform_1i("texture3", 2)
   @program4.uniform_1i("texture4", 3)
   @program4.uniform_matrix4(@world.matrix.world, 'MVP')
+  model_view = @world.matrix.model * @world.matrix.view
+  normal_view = model_view.inverse.transpose
+  @program4.uniform_matrix4(model_view, 'ModelView')
+  @program4.uniform_matrix4(normal_view, 'NormalView')
   @landscape4.draw
 
   @program_cube.use
@@ -101,7 +107,7 @@ fragment_ortho2d_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_ORTH
 
   @texture1 = Drawing::Texture.new
   @texture1.bind
-  @texture1.load("./textures/ccw.bmp")
+  @texture1.load("./textures/pgrass.bmp")
 
   @texture2 = Drawing::Texture.new
   @texture2.bind
