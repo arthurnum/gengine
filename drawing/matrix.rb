@@ -9,7 +9,7 @@ module Drawing
     def rotate(angle, x, y, z)
       v = Vector[x, y, z].normalize
       x, y, z = v.to_a
-      angle = angle * Math::PI / 180.0
+      angle = angle.to_rad
       c = Math::cos(angle)
       s = Math::sin(angle)
 
@@ -35,7 +35,7 @@ module Drawing
     class << self
       def perspective(angle, w, h, near, far)
         aspect = w / h
-        angle_rad = angle * Math::PI / 180.0
+        angle_rad = angle.to_rad
         fovy = angle_rad / 2.0
         f = Math.cos(fovy) / Math.sin(fovy)
         u1 = (far + near) / (near - far)

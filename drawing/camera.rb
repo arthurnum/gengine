@@ -21,7 +21,7 @@ module Drawing
     end
 
     def move(aspect)
-      angle_rad = @angle * Math::PI / 180.0
+      angle_rad = @angle.to_rad
       cosv = Math.cos(angle_rad)
       sinv = Math.sin(angle_rad)
       @position += Vector[-aspect * sinv, 0.0, -aspect * cosv]
@@ -75,7 +75,7 @@ module Drawing
     private
 
     def calculate_look_at
-      angle_rad = @angle * Math::PI / 180.0
+      angle_rad = @angle.to_rad
       cosv = Math.cos(angle_rad)
       sinv = Math.sin(angle_rad)
       look_at_x = @position[0] + 10.0 * sinv
