@@ -1,11 +1,3 @@
-require 'sdl2'
-require 'opengl'
-
-require 'pry'
-
-OpenGL.load_lib
-include OpenGL
-
 require_relative 'glsl/glsl'
 require_relative 'drawing/drawing'
 require_relative 'calculating/calculating'
@@ -188,7 +180,7 @@ window.register_event_handler(:key_down, h_edit_face)
 window.register_event_handler(:key_down, h_apply_texture)
 window.register_event_handler(:mouse_button_down, h_mouse_down)
 
-network = Network::Client.new(ARGV[0], @cubes)
+network = Network::Client.new(ARGV[0] || '127.0.0.1', @cubes)
 pp = Network::Protocol::PacketCamera.new
 pp.vector = @world.camera.position.to_a
 network.write [pp]

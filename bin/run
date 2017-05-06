@@ -1,0 +1,11 @@
+#! /usr/bin/env ruby
+
+require 'rubygems'
+require 'bundler/setup'
+
+Bundler.require :default
+
+OpenGL.load_lib
+include OpenGL
+
+require_relative '../main'
