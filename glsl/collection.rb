@@ -186,5 +186,26 @@ module GLSL
           out_color = texture(texture1, fragUVA).rgba;
         }
       )
+
+      FRAGMENT_SHADER_ORTHO2D_BLEND_INFO = %q(
+        #version 330 core
+
+        in vec2 fragUVA;
+
+        out vec4 out_color;
+
+        uniform sampler2D texture1;
+
+        void main()
+        {
+          float blue = texture(texture1, fragUVA).b;
+
+          if (blue > 0.0) {
+            out_color = vec4(1.0, 1.0, 1.0, 1.0);
+          }  else {
+            out_color = vec4(0.0, 0.0, 0.0, 0.0);
+          }
+        }
+      )
   end
 end

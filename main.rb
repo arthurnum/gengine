@@ -52,9 +52,20 @@ def render
   @texture2.bind
   @program_ortho2d.uniform_1i("texture1", 0)
   @rect2.draw
+
+  @program_ortho2d_info.use
+  @program_ortho2d_info.uniform_matrix4(@mart, 'MVP')
+  glEnable(GL_BLEND)
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+  glActiveTexture(GL_TEXTURE0)
+  @texture_font.bind
+  @program_ortho2d.uniform_1i("texture1", 0)
+  @rect_font.draw
+  glDisable(GL_BLEND)
 end
 
 SDL2.init(SDL2::INIT_EVERYTHING)
+SDL2::TTF.init
 SDL2::GL.set_attribute(SDL2::GL::DOUBLEBUFFER, 1)
 SDL2::GL.set_attribute(SDL2::GL::CONTEXT_MAJOR_VERSION, 3)
 SDL2::GL.set_attribute(SDL2::GL::CONTEXT_MINOR_VERSION, 3)
@@ -78,6 +89,7 @@ vertex_cube_shader = Shader.new(:vertex, Collection::VERTEX_SHADER_CUBE)
 fragment_cube_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_CUBE)
 vertex_ortho2d_shader = Shader.new(:vertex, Collection::VERTEX_SHADER_ORTHO2D)
 fragment_ortho2d_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_ORTHO2D)
+fragment_ortho2d_shader_blend_info = Shader.new(:fragment, Collection::FRAGMENT_SHADER_ORTHO2D_BLEND_INFO)
 
 @program4 = Program.new
 @program4.attach_shaders(vertex_shader4, fragment_shader4)
@@ -90,6 +102,10 @@ fragment_ortho2d_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_ORTH
 @program_ortho2d = Program.new
 @program_ortho2d.attach_shaders(vertex_ortho2d_shader, fragment_ortho2d_shader)
 @program_ortho2d.link
+
+@program_ortho2d_info = Program.new
+@program_ortho2d_info.attach_shaders(vertex_ortho2d_shader, fragment_ortho2d_shader_blend_info)
+@program_ortho2d_info.link
 
 # @world.camera = Drawing::Camera.new(Vector[0.0, 3.0, -10.0], 0.0)
 @world.camera = Drawing::Camera.new(Vector[0.0, 0.0, 0.0], 0.0)
@@ -114,11 +130,17 @@ fragment_ortho2d_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_ORTH
   @texture5 = Drawing::Texture.new
   @texture5.bind
   @texture5.load("./textures/normalm.bmp")
+  
+  font = SDL2::TTF.open('EUROCAPS.TTF', 18, 0)
+  @texture_font = Drawing::Texture.new
+  @texture_font.bind
+  sw, sh = @texture_font.print(font, "FPS: 0.0")
 
   @landscape = Drawing::Object::Landscape.new(10)
   @landscape4 = Drawing::Object::Landscape2.new(350)
   @rect = Drawing::Object::Rectangle.new(10.0, 10.0, 100.0, 100.0)
   @rect2 = Drawing::Object::Rectangle.new(10.0, 120.0, 100.0, 100.0)
+  @rect_font = Drawing::Object::Rectangle.new(10.0, 400.0, sw, sh)
   @mart = Drawing::Matrix.ortho2d(0.0, window.width, 0.0, window.height)
   @cubes = {}
 
@@ -209,6 +231,11 @@ loop do
   delta = time_b - time_a
   if delta > 2.0
     p "FPS #{frames / delta}"
+
+    @texture_font.bind
+    sw, sh = @texture_font.print(font, "FPS: #{(frames / delta).round(2)}")
+    @rect_font.update_vertices(10.0, 400.0, sw, sh)
+
     time_a = time_b
     frames = 0
   end

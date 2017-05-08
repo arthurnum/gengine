@@ -11,10 +11,10 @@ module Drawing
         ]
 
         @uva = [
-          0.0, 0.0,
-          1.0, 0.0,
           0.0, 1.0,
-          1.0, 1.0
+          1.0, 1.0,
+          0.0, 0.0,
+          1.0, 0.0
         ]
 
         @indices = [0, 1, 2, 3]
@@ -49,6 +49,18 @@ module Drawing
 
       def indices_data
         Data::UInt.new(@indices)
+      end
+
+      def update_vertices(x, y, w, h)
+        @vertices = [
+          Vertex.new(x, y, 1.0),
+          Vertex.new(x + w, y, 1.0),
+          Vertex.new(x, y + h, 1.0),
+          Vertex.new(x + w, y + h, 1.0)
+        ]
+
+        @vbo.bind
+        @vbo.sub_data(vertices_data)
       end
 
       def draw

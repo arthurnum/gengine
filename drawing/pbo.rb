@@ -15,5 +15,9 @@ module Drawing
     def data(pixels)
       glBufferData(TARGET, pixels.size, pixels, GL_STATIC_DRAW)
     end
+
+    def sub_data(pixels, offset = 0)
+      glBufferSubData(TARGET, offset, pixels.size, pixels)
+    end
   end
 end
