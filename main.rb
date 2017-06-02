@@ -57,10 +57,12 @@ def render
   @program_ortho2d_info.uniform_matrix4(@mart, 'MVP')
   glEnable(GL_BLEND)
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
   glActiveTexture(GL_TEXTURE0)
-  @texture_font.bind
+  @texture_fps.bind
   @program_ortho2d.uniform_1i("texture1", 0)
-  @rect_font.draw
+  @rect_fps.draw
+
   glDisable(GL_BLEND)
 end
 
@@ -130,17 +132,17 @@ fragment_ortho2d_shader_blend_info = Shader.new(:fragment, Collection::FRAGMENT_
   @texture5 = Drawing::Texture.new
   @texture5.bind
   @texture5.load("./textures/normalm.bmp")
-  
+
   font = SDL2::TTF.open('EUROCAPS.TTF', 18, 0)
-  @texture_font = Drawing::Texture.new
-  @texture_font.bind
-  sw, sh = @texture_font.print(font, "FPS: 0.0")
+  @texture_fps = Drawing::Texture.new
+  @texture_fps.bind
+  sw, sh = @texture_fps.print(font, "FPS: 0.0")
+  @rect_fps = Drawing::Object::Rectangle.new(10.0, 450.0, sw, sh)
 
   @landscape = Drawing::Object::Landscape.new(10)
   @landscape4 = Drawing::Object::Landscape2.new(350)
   @rect = Drawing::Object::Rectangle.new(10.0, 10.0, 100.0, 100.0)
   @rect2 = Drawing::Object::Rectangle.new(10.0, 120.0, 100.0, 100.0)
-  @rect_font = Drawing::Object::Rectangle.new(10.0, 400.0, sw, sh)
   @mart = Drawing::Matrix.ortho2d(0.0, window.width, 0.0, window.height)
   @cubes = {}
 
@@ -191,11 +193,10 @@ h_apply_texture = lambda do |win, ev|
 end
 
 h_mouse_down = lambda do |win, ev|
-  ray = Calculating::Ray.new
-  ray.trace(@world.matrix.world, window.width, window.height, ev.x, window.height - ev.y)
-  @landscape.ray_intersect(ray)
-
-  @landscape.update_colorvbo
+  # ray = Calculating::Ray.new
+  # ray.trace(@world.matrix.world, window.width, window.height, ev.x, window.height - ev.y)
+  # @landscape.ray_intersect(ray)
+  # @landscape.update_colorvbo
 end
 
 window.register_event_handler(:key_down, h_edit_face)
@@ -230,11 +231,9 @@ loop do
   time_b = Time.now
   delta = time_b - time_a
   if delta > 2.0
-    p "FPS #{frames / delta}"
-
-    @texture_font.bind
-    sw, sh = @texture_font.print(font, "FPS: #{(frames / delta).round(2)}")
-    @rect_font.update_vertices(10.0, 400.0, sw, sh)
+    @texture_fps.bind
+    sw, sh = @texture_fps.print(font, "FPS: #{(frames / delta).round(2)}")
+    @rect_fps.update_vertices(10.0, 450.0, sw, sh)
 
     time_a = time_b
     frames = 0
