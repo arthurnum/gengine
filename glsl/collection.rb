@@ -163,10 +163,12 @@ module GLSL
           uniform mat4 MVP;
 
           out vec2 fragUVA;
+          out vec3 fragVertex;
 
           void main()
           {
             fragUVA = uva;
+            fragVertex = pos;
 
             gl_Position = MVP * vec4(pos, 1.0);
           }
@@ -203,6 +205,77 @@ module GLSL
           if (blue > 0.0) {
             out_color = vec4(1.0, 1.0, 1.0, 1.0);
           }  else {
+            out_color = vec4(0.0, 0.0, 0.0, 0.0);
+          }
+        }
+      )
+
+      FRAGMENT_SHADER_ORTHO2D_MENU_EDGE = %q(
+        #version 330 core
+
+        in vec2 fragUVA;
+        in vec3 fragVertex;
+
+        out vec4 out_color;
+
+        uniform vec4 rect_info;
+
+        void calculate_edge_color(in float i, out vec4 color) {
+            float delta = 1.0 - (abs(i - 3.0) / 3.0);
+            color = vec4(0.4, 0.9, 1.0, 1.0 * delta);
+        }
+
+        void calculate_edge_color2(in float i, in float k, out vec4 color) {
+            float delta_i = 1.0 - (abs(i - 3.0) / 3.0);
+            float delta_k = 1.0 - (abs(k - 3.0) / 3.0);
+            float delta_min = min(delta_i, delta_k);
+            float delta_max = max(delta_i, delta_k);
+
+            if (i - 3.0 < 0) {
+              if (k - 3.0 < 0) {
+                color = vec4(0.4, 0.9, 1.0, 1.0 * delta_min);
+              } else {
+                color = vec4(0.4, 0.9, 1.0, 1.0 * delta_i);
+              }
+            } else if (k - 3.0 < 0) {
+              color = vec4(0.4, 0.9, 1.0, 1.0 * delta_k);
+            } else {
+              color = vec4(0.4, 0.9, 1.0, 1.0 * delta_max);
+            }
+        }
+
+        void main()
+        {
+          float left_x = fragVertex.x - rect_info.x;
+          float right_x = rect_info.z - fragVertex.x + rect_info.x;
+          float bottom_y = fragVertex.y - rect_info.y;
+          float top_y = rect_info.w - fragVertex.y + rect_info.y;
+
+          if (left_x < 6) {
+
+            if (bottom_y < 6) {
+              calculate_edge_color2(left_x, bottom_y, out_color);
+            } else if (top_y < 6) {
+              calculate_edge_color2(left_x, top_y, out_color);
+            } else {
+              calculate_edge_color(left_x, out_color);
+            }
+
+          } else if (right_x < 6) {
+
+            if (bottom_y < 6) {
+              calculate_edge_color2(right_x, bottom_y, out_color);
+            } else if (top_y < 6) {
+              calculate_edge_color2(right_x, top_y, out_color);
+            } else {
+              calculate_edge_color(right_x, out_color);
+            }
+
+          } else if (bottom_y < 6) {
+            calculate_edge_color(bottom_y, out_color);
+          } else if (top_y < 6) {
+            calculate_edge_color(top_y, out_color);
+          } else {
             out_color = vec4(0.0, 0.0, 0.0, 0.0);
           }
         }

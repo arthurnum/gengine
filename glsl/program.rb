@@ -39,6 +39,11 @@ module GLSL
       glUniform2fv(ul, 1, vector.to_a.pack('F*'))
     end
 
+    def uniform_vector4fv(vector, name)
+      ul = get_uniform_location(name)
+      glUniform4fv(ul, 1, vector.to_a.pack('F*'))
+    end
+
     def uniform_1i(name, value)
       ul = get_uniform_location(name)
       glUniform1i(ul, value)

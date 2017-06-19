@@ -1,8 +1,16 @@
 module Drawing
   module Object
     class Rectangle
+      attr_reader :position, :offset
+
+      MOVE_MENU_FRAMES = 6
 
       def initialize(x, y, w, h)
+        @position = Vector[x, y, w, h]
+        @move_frame_count = 0
+        @offset = 0.0
+        @move_offset = 0.0
+
         @vertices = [
           Vertex.new(x, y, 1.0),
           Vertex.new(x + w, y, 1.0),
@@ -66,6 +74,29 @@ module Drawing
       def draw
         @vao.bind
         glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, 0)
+      end
+
+      def move(i)
+        @move_frame_count += MOVE_MENU_FRAMES
+        @move_offset += i
+      end
+
+      def update
+        if @move_frame_count > 0
+          @move_frame_count -= 1
+
+          if @move_frame_count == 0
+             @offset = @move_offset
+          else
+            delta = [@move_frame_count, MOVE_MENU_FRAMES].min.to_f
+            delta_offset = (@move_offset - @offset) * Math.cos(delta / MOVE_MENU_FRAMES.to_f)
+            @offset += delta_offset
+          end
+        end
+      end
+
+      def height
+        position[3]
       end
     end
   end

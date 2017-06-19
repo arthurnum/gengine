@@ -92,6 +92,7 @@ fragment_cube_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_CUBE)
 vertex_ortho2d_shader = Shader.new(:vertex, Collection::VERTEX_SHADER_ORTHO2D)
 fragment_ortho2d_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_ORTHO2D)
 fragment_ortho2d_shader_blend_info = Shader.new(:fragment, Collection::FRAGMENT_SHADER_ORTHO2D_BLEND_INFO)
+fragment_ortho2d_shader_menu_edge = Shader.new(:fragment, Collection::FRAGMENT_SHADER_ORTHO2D_MENU_EDGE)
 
 @program4 = Program.new
 @program4.attach_shaders(vertex_shader4, fragment_shader4)
@@ -108,6 +109,10 @@ fragment_ortho2d_shader_blend_info = Shader.new(:fragment, Collection::FRAGMENT_
 @program_ortho2d_info = Program.new
 @program_ortho2d_info.attach_shaders(vertex_ortho2d_shader, fragment_ortho2d_shader_blend_info)
 @program_ortho2d_info.link
+
+@program_ortho2d_menu_edge = Program.new
+@program_ortho2d_menu_edge.attach_shaders(vertex_ortho2d_shader, fragment_ortho2d_shader_menu_edge)
+@program_ortho2d_menu_edge.link
 
 # @world.camera = Drawing::Camera.new(Vector[0.0, 3.0, -10.0], 0.0)
 @world.camera = Drawing::Camera.new(Vector[0.0, 0.0, 0.0], 0.0)
@@ -199,6 +204,28 @@ h_mouse_down = lambda do |win, ev|
   # @landscape.update_colorvbo
 end
 
+# menu block
+menu_item1 = Context::MenuItem.new("Exit")
+menu_item1.callback = lambda do
+  window.exit
+end
+
+menu_item2 = Context::MenuItem.new("Start")
+
+menu = Context::Menu.new
+menu.add(menu_item1)
+menu.add(Context::MenuItem.new('dummy_item'))
+menu.add(Context::MenuItem.new('dummy_item'))
+menu.add(Context::MenuItem.new('dummy_item'))
+menu.add(menu_item2)
+menu.font = SDL2::TTF.open('EUROCAPS.TTF', 32, 0)
+menu.item_shader = @program_ortho2d_info
+menu.focus_shader = @program_ortho2d_menu_edge
+menu.matrix = @mart
+menu.window = window
+menu.setup
+
+
 window.register_event_handler(:key_down, h_edit_face)
 window.register_event_handler(:key_down, h_apply_texture)
 window.register_event_handler(:mouse_button_down, h_mouse_down)
@@ -212,7 +239,11 @@ network.write [pp]
 loop do
   network.read
 
-  render
+  menu.update
+
+  # render
+
+  menu.draw
 
   window.events_poll
   exit if window.exit?
