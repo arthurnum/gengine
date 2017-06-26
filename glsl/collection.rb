@@ -220,9 +220,13 @@ module GLSL
 
         uniform vec4 rect_info;
 
+        void result_color(in float alpha, out vec4 color) {
+          color = vec4(0.4, 0.9, 1.0, alpha);
+        }
+
         void calculate_edge_color(in float i, out vec4 color) {
             float delta = 1.0 - (abs(i - 3.0) / 3.0);
-            color = vec4(0.4, 0.9, 1.0, 1.0 * delta);
+            result_color(delta, color);
         }
 
         void calculate_edge_color2(in float i, in float k, out vec4 color) {
@@ -233,14 +237,14 @@ module GLSL
 
             if (i - 3.0 < 0) {
               if (k - 3.0 < 0) {
-                color = vec4(0.4, 0.9, 1.0, 1.0 * delta_min);
+                result_color(delta_min, color);
               } else {
-                color = vec4(0.4, 0.9, 1.0, 1.0 * delta_i);
+                result_color(delta_i, color);
               }
             } else if (k - 3.0 < 0) {
-              color = vec4(0.4, 0.9, 1.0, 1.0 * delta_k);
+              result_color(delta_k, color);
             } else {
-              color = vec4(0.4, 0.9, 1.0, 1.0 * delta_max);
+              result_color(delta_max, color);
             }
         }
 
