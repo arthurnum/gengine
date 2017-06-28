@@ -138,7 +138,7 @@ fragment_ortho2d_shader_menu_edge = Shader.new(:fragment, Collection::FRAGMENT_S
   @texture5.bind
   @texture5.load("./textures/normalm.bmp")
 
-  font = SDL2::TTF.open('EUROCAPS.TTF', 18, 0)
+  font = SDL2::TTF.open('Hack-Bold.ttf', 18, 0)
   @texture_fps = Drawing::Texture.new
   @texture_fps.bind
   sw, sh = @texture_fps.print(font, "FPS: 0.0")
@@ -218,7 +218,7 @@ menu.add(Context::MenuItem.new('dummy_item'))
 menu.add(Context::MenuItem.new('dummy_item'))
 menu.add(Context::MenuItem.new('dummy_item'))
 menu.add(menu_item2)
-menu.font = SDL2::TTF.open('EUROCAPS.TTF', 32, 0)
+menu.font = SDL2::TTF.open('Hack-Bold.ttf', 22, 0)
 menu.item_shader = @program_ortho2d_info
 menu.focus_shader = @program_ortho2d_menu_edge
 menu.matrix = @mart
