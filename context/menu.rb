@@ -26,10 +26,10 @@ module Context
         y += h + PADDING
         max_w = w if w > max_w
       end
-      max_h = items[0].rectangle.height
+      max_h = items[0].height
 
       @active_item = items.last
-      @focus = Drawing::Object::Rectangle.new(x, @active_item.rectangle.position[1] - HALF_PADDING, max_w + PADDING * 2, max_h + PADDING)
+      @focus = Drawing::Object::Rectangle.new(x, @active_item.y - HALF_PADDING, max_w + PADDING * 2, max_h + PADDING)
 
       items_itr = items.each
       item1 = items_itr.next
@@ -43,14 +43,14 @@ module Context
       window.register_event_handler(:key_down, lambda do |win, ev|
           if ev.scancode == SDL2::Key::Scan::UP
             if next_item = @active_item.next
-              i = next_item.rectangle.position[1] - @active_item.rectangle.position[1]
+              i = next_item.y - @active_item.y
               @focus.move(i)
               @active_item = next_item
             end
           end
           if ev.scancode == SDL2::Key::Scan::DOWN
             if previous_item = @active_item.previous
-              i = previous_item.rectangle.position[1] - @active_item.rectangle.position[1]
+              i = previous_item.y - @active_item.y
               @focus.move(i)
               @active_item = previous_item
             end

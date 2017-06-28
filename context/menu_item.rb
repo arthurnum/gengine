@@ -14,5 +14,21 @@ module Context
     def submit
       callback.call
     end
+
+    def x
+      rectangle.x
+    end
+
+    def y
+      rectangle.y
+    end
+
+    def width
+      rectangle.width
+    end
+
+    def height
+      rectangle.height
+    end
   end
 end

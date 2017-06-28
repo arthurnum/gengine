@@ -95,6 +95,18 @@ module Drawing
         end
       end
 
+      def x
+        position[0]
+      end
+
+      def y
+        position[1]
+      end
+
+      def width
+        position[2]
+      end
+
       def height
         position[3]
       end
