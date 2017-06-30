@@ -153,56 +153,11 @@ fragment_ortho2d_shader_menu_edge = Shader.new(:fragment, Collection::FRAGMENT_S
 
   # puts "Landscape size: #{@landscape.size}"
 
-focus_array = []
-
 time_a = Time.now
 frames = 0.0
 
 Context::WindowCallbacks.init(window)
 constructor = Context::Constructor.new(window, @world)
-
-h_edit_face = lambda do |win, ev|
-  if ev.scancode == SDL2::Key::Scan::UP
-    @landscape.up!(constructor.shift_radius)
-    touch_supervbo = true
-  end
-
-  if ev.scancode == SDL2::Key::Scan::DOWN
-    @landscape.down!(constructor.shift_radius)
-    touch_supervbo = true
-  end
-end
-
-h_apply_texture = lambda do |win, ev|
-  if ev.scancode == SDL2::Key::Scan::LEFT
-    @landscape.focus_array.each do |face|
-      face.each_vertex do |v|
-        v.uva -= 0.1
-        v.uva = 0.0 if v.uva < 0.0
-      end
-    end
-
-    @landscape.update_uvavbo
-  end
-
-  if ev.scancode == SDL2::Key::Scan::RIGHT
-    @landscape.focus_array.each do |face|
-      face.each_vertex do |v|
-        v.uva += 0.1
-        v.uva = 1.0 if v.uva > 1.0
-      end
-    end
-
-    @landscape.update_uvavbo
-  end
-end
-
-h_mouse_down = lambda do |win, ev|
-  # ray = Calculating::Ray.new
-  # ray.trace(@world.matrix.world, window.width, window.height, ev.x, window.height - ev.y)
-  # @landscape.ray_intersect(ray)
-  # @landscape.update_colorvbo
-end
 
 # menu block
 menu_item1 = Context::MenuItem.new("Exit")
@@ -224,11 +179,6 @@ menu.focus_shader = @program_ortho2d_menu_edge
 menu.matrix = @mart
 menu.window = window
 menu.setup
-
-
-window.register_event_handler(:key_down, h_edit_face)
-window.register_event_handler(:key_down, h_apply_texture)
-window.register_event_handler(:mouse_button_down, h_mouse_down)
 
 network = Network::Client.new(ARGV[0] || '127.0.0.1', @cubes)
 pp = Network::Protocol::PacketCamera.new
