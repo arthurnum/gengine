@@ -40,6 +40,9 @@ module Context
         item1 = item2
       end
 
+      @input_box = InputBox.generate(200, 200, font, "test")
+      SDL2::TextInput.start
+
       window.register_event_handler(:key_down, lambda do |win, ev|
           if ev.scancode == SDL2::Key::Scan::UP
             if next_item = @active_item.next
@@ -55,9 +58,17 @@ module Context
               @active_item = previous_item
             end
           end
+          if ev.scancode == SDL2::Key::Scan::BACKSPACE
+             @input_box.chop(font)
+          end
           if ev.scancode == SDL2::Key::Scan::RETURN
             @active_item.submit
           end
+        end
+      )
+
+      window.register_event_handler(:text_input, lambda do |win, ev|
+          @input_box.add(font, ev.text)
         end
       )
     end
@@ -67,15 +78,18 @@ module Context
       glDisable(GL_DEPTH_TEST)
       glEnable(GL_BLEND)
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+      glActiveTexture(GL_TEXTURE0)
 
       item_shader.use
       item_shader.uniform_matrix4(matrix, 'MVP')
+      item_shader.uniform_1i("texture1", 0)
       items.each do |item|
-        glActiveTexture(GL_TEXTURE0)
         item.texture.bind
-        item_shader.uniform_1i("texture1", 0)
         item.rectangle.draw
       end
+
+      @input_box.texture.bind
+      @input_box.rectangle.draw
 
       focus_shader.use
       focus_shader.uniform_matrix4(matrix.translate(0, focus.offset, 0), 'MVP')

@@ -26,7 +26,8 @@ module Context
         mouse_button_down: Event.new,
         mouse_button_up: Event.new,
         mouse_motion: Event.new,
-        mouse_wheel: Event.new
+        mouse_wheel: Event.new,
+        text_input: Event.new
       }
       @exit_mode = false
     end
@@ -83,6 +84,10 @@ module Context
 
         if SDL2::Event::MouseWheel === ev
           @events[:mouse_wheel].trigger(self, ev)
+        end
+
+        if SDL2::Event::TextInput === ev
+          @events[:text_input].trigger(self, ev)
         end
       end
     end
