@@ -173,7 +173,7 @@ menu.add(Context::MenuItem.new('dummy_item'))
 menu.add(Context::MenuItem.new('dummy_item'))
 menu.add(Context::MenuItem.new('dummy_item'))
 menu.add(menu_item2)
-menu.font = SDL2::TTF.open('Hack-Bold.ttf', 22, 0)
+menu.font = SDL2::TTF.open('Hack-Regular.ttf', 14, 0)
 menu.item_shader = @program_ortho2d_info
 menu.focus_shader = @program_ortho2d_menu_edge
 menu.matrix = @mart
