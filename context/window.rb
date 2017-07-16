@@ -52,6 +52,10 @@ module Context
       @events[event].handlers << handler
     end
 
+    def remove_event_handler(event, handler)
+      @events[event].handlers.delete(handler)
+    end
+
     def exit
       @exit_mode = true
     end

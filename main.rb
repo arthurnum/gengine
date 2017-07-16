@@ -9,6 +9,7 @@ include GLSL
 @world = Drawing::World.new
 
 touch_supervbo = false
+active_render = false
 
 def render
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -81,7 +82,6 @@ context = SDL2::GL::Context.create(window.sdl_window)
 
 glViewport(0, 0, window.width, window.height)
 glClearColor(0,0,0,0)
-glEnable(GL_DEPTH_TEST)
 
 vertex_shader = Shader.new(:vertex, Collection::VERTEX_SHADER_S3)
 fragment_shader = Shader.new(:fragment, Collection::FRAGMENT_SHADER_S3)
@@ -159,15 +159,27 @@ frames = 0.0
 Context::WindowCallbacks.init(window)
 constructor = Context::Constructor.new(window, @world)
 
+SDL2::TextInput.stop
+
 # menu block
+menu = Context::Menu.new
+
 menu_item1 = Context::MenuItem.new("Exit")
 menu_item1.callback = lambda do
   window.exit
 end
 
 menu_item2 = Context::MenuItem.new("Start")
+menu_item2.callback = lambda do
+  menu.turn_off_state_1
+  menu.turn_on_state_2
+end
 
-menu = Context::Menu.new
+menu.on_exit do
+  active_render = true
+  glEnable(GL_DEPTH_TEST)
+end
+
 menu.add(menu_item1)
 menu.add(Context::MenuItem.new('dummy_item'))
 menu.add(Context::MenuItem.new('dummy_item'))
@@ -189,11 +201,12 @@ network.write [pp]
 loop do
   network.read
 
-  menu.update
-
-  # render
-
-  menu.draw
+  if active_render
+    render
+  else
+    menu.update
+    menu.draw
+  end
 
   window.events_poll
   exit if window.exit?

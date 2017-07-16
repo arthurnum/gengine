@@ -41,36 +41,46 @@ module Context
       end
 
       @input_box = InputBox.generate(200, 200, font, "test")
-      SDL2::TextInput.start
 
-      window.register_event_handler(:key_down, lambda do |win, ev|
-          if ev.scancode == SDL2::Key::Scan::UP
+      @h_menu_switch = lambda do |win, ev|
+        if ev.scancode == SDL2::Key::Scan::UP
             if next_item = @active_item.next
               i = next_item.y - @active_item.y
               @focus.move(i)
               @active_item = next_item
             end
           end
-          if ev.scancode == SDL2::Key::Scan::DOWN
-            if previous_item = @active_item.previous
-              i = previous_item.y - @active_item.y
-              @focus.move(i)
-              @active_item = previous_item
-            end
-          end
-          if ev.scancode == SDL2::Key::Scan::BACKSPACE
-             @input_box.chop(font)
-          end
-          if ev.scancode == SDL2::Key::Scan::RETURN
-            @active_item.submit
+        if ev.scancode == SDL2::Key::Scan::DOWN
+          if previous_item = @active_item.previous
+            i = previous_item.y - @active_item.y
+            @focus.move(i)
+            @active_item = previous_item
           end
         end
-      )
+        if ev.scancode == SDL2::Key::Scan::RETURN
+          @active_item.submit
+        end
+      end
 
-      window.register_event_handler(:text_input, lambda do |win, ev|
-          @input_box.add(font, ev.text)
+      @h_text_input = lambda do |win, ev|
+        @input_box.add(font, ev.text)
+      end
+
+      @h_text_input_backspace = lambda do |win, ev|
+        if ev.scancode == SDL2::Key::Scan::BACKSPACE
+          @input_box.chop(font)
         end
-      )
+        if ev.scancode == SDL2::Key::Scan::DELETE
+          turn_off_state_2
+          turn_on_state_1
+        end
+        if ev.scancode == SDL2::Key::Scan::RETURN
+          turn_off_state_2
+          self.exit
+        end
+      end
+
+      turn_on_state_1
     end
 
     def draw
@@ -103,5 +113,32 @@ module Context
       focus.update
     end
 
+    def on_exit(&block)
+      @exit_callback = block
+    end
+
+    def exit
+      @exit_callback.call
+    end
+
+    def turn_on_state_1
+      window.register_event_handler(:key_down, @h_menu_switch)
+    end
+
+    def turn_off_state_1
+      window.remove_event_handler(:key_down, @h_menu_switch)
+    end
+
+    def turn_on_state_2
+      SDL2::TextInput.start
+      window.register_event_handler(:text_input, @h_text_input)
+      window.register_event_handler(:key_down, @h_text_input_backspace)
+    end
+
+    def turn_off_state_2
+      SDL2::TextInput.stop
+      window.remove_event_handler(:text_input, @h_text_input)
+      window.remove_event_handler(:key_down, @h_text_input_backspace)
+    end
   end
 end
