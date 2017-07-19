@@ -6,4 +6,5 @@ version = "0.0.1-dev"
 bincode = "0.8.0"
 serde = "1.0.4"
 serde_derive = "1.0.4"
+mysql = "11.3.1"
 

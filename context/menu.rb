@@ -3,7 +3,8 @@ module Context
     PADDING = 20
     HALF_PADDING = 10
 
-    attr_accessor :items, :focus, :font, :position, :item_shader, :focus_shader, :matrix, :window
+    attr_accessor :items, :focus, :font, :position, :item_shader, :focus_shader, :matrix,
+                  :window, :network
 
     def initialize
       @items = []
@@ -40,7 +41,7 @@ module Context
         item1 = item2
       end
 
-      @input_box = InputBox.generate(200, 200, font, "test")
+      @input_box = InputBox.generate(200, 200, font, "arthurnum")
 
       @h_menu_switch = lambda do |win, ev|
         if ev.scancode == SDL2::Key::Scan::UP
@@ -75,8 +76,13 @@ module Context
           turn_on_state_1
         end
         if ev.scancode == SDL2::Key::Scan::RETURN
-          turn_off_state_2
-          self.exit
+          if try_to_log_in
+            puts " OK."
+            turn_off_state_2
+            self.exit
+          else
+            puts " failed."
+          end
         end
       end
 
@@ -139,6 +145,22 @@ module Context
       SDL2::TextInput.stop
       window.remove_event_handler(:text_input, @h_text_input)
       window.remove_event_handler(:key_down, @h_text_input_backspace)
+    end
+
+    def try_to_log_in
+      login_packet = Network::Protocol::PacketUserLogIn.new
+      login_packet.player_name = @input_box.text.chomp
+      puts "Try to log in: #{login_packet.player_name}"
+      network.write [login_packet]
+      tries = 5
+      begin
+        puts ' wait for response...'
+        packages = network.read
+        sleep 0.4
+        tries -= 1
+      end while tries > 0 && !packages
+
+      packages && packages.any? { |pckg| pckg.is_a?(Network::Protocol::PacketUserLogInOK) }
     end
   end
 end

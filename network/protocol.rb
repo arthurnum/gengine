@@ -6,18 +6,22 @@ module Network
 
     SPLITSTR = 'PCK'
 
-    IN = 1
-    CUBE_REQUEST = 2
-    CUBE_RESPONSE = 3
-    CAMERA = 4
-    CAMERA_UNIQ = 5
+    IN             = 1
+    CUBE_REQUEST   = 2
+    CUBE_RESPONSE  = 3
+    CAMERA         = 4
+    CAMERA_UNIQ    = 5
+    USER_LOG_IN    = 6
+    USER_LOG_IN_OK = 7
 
     CODE_TO_PACKET = {
-      IN => "Network::Protocol::PacketIn",
-      CUBE_REQUEST => "Network::Protocol::PacketCubeRequest",
-      CUBE_RESPONSE => "Network::Protocol::PacketCubeResponse",
-      CAMERA => "Network::Protocol::PacketCamera",
-      CAMERA_UNIQ => "Network::Protocol::PacketCameraUniq",
+      IN              => "Network::Protocol::PacketIn",
+      CUBE_REQUEST    => "Network::Protocol::PacketCubeRequest",
+      CUBE_RESPONSE   => "Network::Protocol::PacketCubeResponse",
+      CAMERA          => "Network::Protocol::PacketCamera",
+      CAMERA_UNIQ     => "Network::Protocol::PacketCameraUniq",
+      USER_LOG_IN     => "Network::Protocol::PacketUserLogIn",
+      USER_LOG_IN_OK  => "Network::Protocol::PacketUserLogInOK"
     }
 
     def self.parse(msg)
@@ -156,6 +160,56 @@ module Network
         data = [@code]
         data << "%-24s" % @id
         data << @vector
+        data.flatten.pack DATA_FORMAT
+      end
+    end
+
+    ############
+    # PacketUserLogIn
+    #
+    #
+    class PacketUserLogIn
+      DATA_FORMAT = "c A32"
+
+      attr_accessor :player_name
+
+      def initialize
+        @code = Protocol::USER_LOG_IN
+      end
+
+      def self.unpack(msg)
+        data = msg.unpack(DATA_FORMAT)
+        packet = self.new
+        packet.player_name = data[1]
+        packet
+      end
+
+      def pack
+        data = [@code]
+        data << "%-32s" % player_name
+        data.flatten.pack DATA_FORMAT
+      end
+    end
+
+    ############
+    # PacketUserLogInOK
+    #
+    #
+    class PacketUserLogInOK
+      DATA_FORMAT = "c"
+
+      def initialize
+        @code = Protocol::USER_LOG_IN_OK
+      end
+
+      def self.unpack(msg)
+        data = msg.unpack(DATA_FORMAT)
+        packet = self.new
+        packet
+      end
+
+      def pack
+        data = [@code]
         data.flatten.pack DATA_FORMAT
       end
     end
