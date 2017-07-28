@@ -32,11 +32,17 @@ module Network
       Object.const_get(CODE_TO_PACKET[code]).unpack(msg)
     end
 
+    module Base
+      def user_log_in_ok?; false; end
+    end
+
     ############
     # PacketIn
     #
     #
     class PacketIn
+      include Base
+
       DATA_FORMAT = "c A64"
 
       attr_accessor :username
@@ -64,6 +70,8 @@ module Network
     #
     #
     class PacketCubeRequest
+      include Base
+
       DATA_FORMAT = "c"
 
       def initialize
@@ -86,6 +94,8 @@ module Network
     #
     #
     class PacketCubeResponse
+      include Base
+
       DATA_FORMAT = "c d*"
 
       attr_accessor :vector
@@ -113,6 +123,8 @@ module Network
     #
     #
     class PacketCamera
+      include Base
+
       DATA_FORMAT = "c d*"
 
       attr_accessor :vector
@@ -140,6 +152,8 @@ module Network
     #
     #
     class PacketCameraUniq
+      include Base
+
       DATA_FORMAT = "c A24 d*"
 
       attr_accessor :id, :vector
@@ -169,6 +183,8 @@ module Network
     #
     #
     class PacketUserLogIn
+      include Base
+
       DATA_FORMAT = "c A32"
 
       attr_accessor :player_name
@@ -196,6 +212,8 @@ module Network
     #
     #
     class PacketUserLogInOK
+      include Base
+
       DATA_FORMAT = "c"
 
       def initialize
@@ -211,6 +229,10 @@ module Network
       def pack
         data = [@code]
         data.flatten.pack DATA_FORMAT
+      end
+
+      def user_log_in_ok?
+        true
       end
     end
   end

@@ -160,7 +160,7 @@ module Context
         tries -= 1
       end while tries > 0 && !packages
 
-      packages && packages.any? { |pckg| pckg.is_a?(Network::Protocol::PacketUserLogInOK) }
+      packages && packages.any? { |pckg| pckg.user_log_in_ok? }
     end
   end
 end
