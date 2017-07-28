@@ -190,19 +190,27 @@ menu.item_shader = @program_ortho2d_info
 menu.focus_shader = @program_ortho2d_menu_edge
 menu.matrix = @mart
 menu.window = window
+
+network = Network::Client.new(ARGV[0] || '127.0.0.1')
+# network = Network::Client.new(ARGV[0] || '127.0.0.1', @cubes)
+menu.network = network
+
 menu.setup
 
-network = Network::Client.new(ARGV[0] || '127.0.0.1', @cubes)
 pp = Network::Protocol::PacketCamera.new
 pp.vector = @world.camera.position.to_a
-network.write [pp]
+# network.write [pp]
 
 # You can use OpenGL functions
 loop do
-  network.read
 
   if active_render
+    network.read
+
     render
+
+    pp.vector = @world.camera.position.to_a
+    network.write [pp]
   else
     menu.update
     menu.draw
@@ -218,8 +226,6 @@ loop do
     touch_supervbo = false
   end
 
-  pp.vector = @world.camera.position.to_a
-  network.write [pp]
 
   frames += 1.0
   time_b = Time.now

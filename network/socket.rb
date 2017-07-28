@@ -4,25 +4,26 @@ require_relative 'protocol'
 
 module Network
   class Client
-    def initialize(addr, obj_link)
+    def initialize(addr)
       @conn = UDPSocket.new
       @packet = Network::Protocol::PacketCubeRequest.new
       @addr = addr
-      @obj_link = obj_link
+      # @obj_link = obj_link
       @dest = Socket.sockaddr_in(45000, addr)
     end
 
     def read
       msg, sender = @conn.recvfrom_nonblock(128)
 
-      msg.split(Network::Protocol::SPLITSTR).each do |pck|
+      msg.split(Network::Protocol::SPLITSTR).map do |pck|
 
-        rp = Network::Protocol.parse pck
+        Network::Protocol.parse pck
+        # rp = Network::Protocol.parse pck
 
-        if rp.is_a? Network::Protocol::PacketCameraUniq
-          @obj_link[rp.id] ||= Drawing::Object::Cube.new(0.0, 0.0, 0.0, 0.5)
-          @obj_link[rp.id].position = Vector.elements(rp.vector) + Vector[0.0, -1.5, 0.0]
-        end
+        # if rp.is_a? Network::Protocol::PacketCameraUniq
+        #   @obj_link[rp.id] ||= Drawing::Object::Cube.new(0.0, 0.0, 0.0, 0.5)
+        #   @obj_link[rp.id].position = Vector.elements(rp.vector) + Vector[0.0, -1.5, 0.0]
+        # end
 
       end
 
