@@ -30,16 +30,6 @@ struct CamPos {
 //   z: f64
 // }
 
-struct UserLogIn {
-  i: u8,
-  name: String
-}
-
-#[derive(Serialize)]
-struct UserLogInOK {
-    i: u8
-}
-
 // impl CamPos {
 //   fn to_uniq(&self, id_str: String) -> CamPosUniq {
 //     let mut borrow_id_bytes = id_str.into_bytes();
@@ -84,18 +74,13 @@ fn main() {
 
         match buf[0] {
             protocol::USER_LOG_IN => {
-                let mut string_bytes = buf[1..].to_vec();
-                string_bytes.retain( |&x| x != 0 );
-                let in_package = UserLogIn {
-                    i: protocol::USER_LOG_IN,
-                    name: String::from_utf8(string_bytes).unwrap()
-                };
+                let in_package = protocol::build_user_log_in(&buf);
                 print!("UserLogIn {:?} ... ", in_package.name);
                 io::stdout().flush().unwrap();
                 if db::foo(&context, in_package.name) {
                     println!("OK.");
-                    let out_package = UserLogInOK { i: protocol::USER_LOG_IN_OK };
-                    let mut complete_package: Vec<u8> = bincode::serialize(&out_package, bincode::Infinite).unwrap();
+                    let out_package = protocol::build_user_log_in_ok();
+                    let complete_package: Vec<u8> = out_package.serialize();
                     socket.send_to(&complete_package, src_addr).expect("couldn't send a package");
                 } else { println!("not found."); }
             },
