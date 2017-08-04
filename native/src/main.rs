@@ -8,6 +8,7 @@ extern crate serde_derive;
 use std::net::{UdpSocket, SocketAddr};
 // use std::collections::HashMap;
 use std::io::{self, Write};
+use std::env;
 
 mod global_context;
 mod db;
@@ -55,12 +56,20 @@ fn sleep_nop() {
 // }
 
 fn main() {
-  let socket = UdpSocket::bind("127.0.0.1:45000").expect("couldn't bind to address");
+    let mut bind_addr = "127.0.0.1:45000".to_string();
+    if env::args().count() > 1 {
+        bind_addr = env::args().nth(1).unwrap() + ":45000";
+    }
+
+    println!("Binding {}", bind_addr);
+
+
+  let socket = UdpSocket::bind(bind_addr.clone()).expect("couldn't bind to address");
   socket.set_nonblocking(true).expect("couldn't set nonblocking");
 
   let context = global_context::new();
 
-  println!("Listen 127.0.0.1:45000");
+  println!("Listen {}", bind_addr);
 
   // let mut cameras_hash: HashMap<String, CamPosUniq> = HashMap::new();
   let mut buf: [u8; 128] = [0; 128];
