@@ -63,7 +63,6 @@ fn main() {
 
     println!("Binding {}", bind_addr);
 
-
   let socket = UdpSocket::bind(bind_addr.clone()).expect("couldn't bind to address");
   socket.set_nonblocking(true).expect("couldn't set nonblocking");
 
@@ -88,10 +87,15 @@ fn main() {
                 io::stdout().flush().unwrap();
                 if db::foo(&context, in_package.name) {
                     println!("OK.");
-                    let out_package = protocol::build_user_log_in_ok();
+                    let out_package = protocol::UserLogInOK::build();
                     let complete_package: Vec<u8> = out_package.serialize();
                     socket.send_to(&complete_package, src_addr).expect("couldn't send a package");
-                } else { println!("not found."); }
+                } else {
+                    println!("not found.");
+                    let out_package = protocol::UserLogInFailure::build();
+                    let complete_package: Vec<u8> = out_package.serialize();
+                    socket.send_to(&complete_package, src_addr).expect("couldn't send a package");
+                }
             },
 
             _ => {}

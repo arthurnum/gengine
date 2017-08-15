@@ -5,8 +5,9 @@ use bincode;
 // pub const CUBE_RESPONSE   : u8 = 3;
 // pub const CAMERA          : u8 = 4;
 // pub const CAMERA_UNIQ     : u8 = 5;
-pub const USER_LOG_IN     : u8 = 6;
-pub const USER_LOG_IN_OK  : u8 = 7;
+pub const USER_LOG_IN           : u8 = 6;
+pub const USER_LOG_IN_OK        : u8 = 7;
+pub const USER_LOG_IN_FAILURE   : u8 = 8;
 
 pub struct UserLogIn {
   i: u8,
@@ -28,11 +29,35 @@ pub struct UserLogInOK {
 }
 
 impl UserLogInOK {
+    pub fn build() -> UserLogInOK {
+        UserLogInOK { i: USER_LOG_IN_OK }
+    }
+
     pub fn serialize(&self) -> Vec<u8> {
         bincode::serialize(self, bincode::Infinite).unwrap()
     }
 }
 
-pub fn build_user_log_in_ok() -> UserLogInOK {
-    UserLogInOK { i: USER_LOG_IN_OK }
+#[derive(Serialize)]
+pub struct UserLogInFailure {
+    i: u8
+}
+
+impl UserLogInFailure {
+    pub fn build() -> UserLogInFailure {
+        UserLogInFailure { i: USER_LOG_IN_FAILURE }
+    }
+
+    pub fn serialize(&self) -> Vec<u8> {
+        bincode::serialize(self, bincode::Infinite).unwrap()
+    }
+}
+
+#[test]
+fn test_packets() {
+    let pck = UserLogInOK::build();
+    assert_eq!(USER_LOG_IN_OK, pck.i);
+
+    let pck = UserLogInFailure::build();
+    assert_eq!(USER_LOG_IN_FAILURE, pck.i);
 }

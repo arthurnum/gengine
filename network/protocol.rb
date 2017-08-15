@@ -6,22 +6,24 @@ module Network
 
     SPLITSTR = 'PCK'
 
-    IN             = 1
-    CUBE_REQUEST   = 2
-    CUBE_RESPONSE  = 3
-    CAMERA         = 4
-    CAMERA_UNIQ    = 5
-    USER_LOG_IN    = 6
-    USER_LOG_IN_OK = 7
+    IN                  = 1
+    CUBE_REQUEST        = 2
+    CUBE_RESPONSE       = 3
+    CAMERA              = 4
+    CAMERA_UNIQ         = 5
+    USER_LOG_IN         = 6
+    USER_LOG_IN_OK      = 7
+    USER_LOG_IN_FAILURE = 8
 
     CODE_TO_PACKET = {
-      IN              => "Network::Protocol::PacketIn",
-      CUBE_REQUEST    => "Network::Protocol::PacketCubeRequest",
-      CUBE_RESPONSE   => "Network::Protocol::PacketCubeResponse",
-      CAMERA          => "Network::Protocol::PacketCamera",
-      CAMERA_UNIQ     => "Network::Protocol::PacketCameraUniq",
-      USER_LOG_IN     => "Network::Protocol::PacketUserLogIn",
-      USER_LOG_IN_OK  => "Network::Protocol::PacketUserLogInOK"
+      IN                  => "Network::Protocol::PacketIn",
+      CUBE_REQUEST        => "Network::Protocol::PacketCubeRequest",
+      CUBE_RESPONSE       => "Network::Protocol::PacketCubeResponse",
+      CAMERA              => "Network::Protocol::PacketCamera",
+      CAMERA_UNIQ         => "Network::Protocol::PacketCameraUniq",
+      USER_LOG_IN         => "Network::Protocol::PacketUserLogIn",
+      USER_LOG_IN_OK      => "Network::Protocol::PacketUserLogInOK",
+      USER_LOG_IN_FAILURE => "Network::Protocol::PacketUserLogInFailure"
     }
 
     def self.parse(msg)
@@ -233,6 +235,31 @@ module Network
 
       def user_log_in_ok?
         true
+      end
+    end
+
+    ############
+    # PacketUserLogInFailure
+    #
+    #
+    class PacketUserLogInFailure
+      include Base
+
+      DATA_FORMAT = "c"
+
+      def initialize
+        @code = Protocol::USER_LOG_IN_FAILURE
+      end
+
+      def self.unpack(msg)
+        data = msg.unpack(DATA_FORMAT)
+        packet = self.new
+        packet
+      end
+
+      def pack
+        data = [@code]
+        data.flatten.pack DATA_FORMAT
       end
     end
   end
