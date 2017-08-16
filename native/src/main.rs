@@ -85,7 +85,7 @@ fn main() {
                 let in_package = protocol::build_user_log_in(&buf);
                 print!("UserLogIn {:?} ... ", in_package.name);
                 io::stdout().flush().unwrap();
-                if db::foo(&context, in_package.name) {
+                if db::find_player(&context, in_package.name) {
                     println!("OK.");
                     let out_package = protocol::UserLogInOK::build();
                     let complete_package: Vec<u8> = out_package.serialize();

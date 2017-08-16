@@ -7,11 +7,11 @@ pub struct Player {
 #[test]
 fn test_db() {
     let globalContext = global_context::new();
-    assert_eq!(false, foo(&globalContext, "arthur".to_string()));
-    assert_eq!(true, foo(&globalContext, "arthurnum".to_string()));
+    assert_eq!(false, find_player(&globalContext, "arthur".to_string()));
+    assert_eq!(true, find_player(&globalContext, "arthurnum".to_string()));
 }
 
-pub fn foo(context: &GlobalContext, plname: String) -> bool {
+pub fn find_player(context: &GlobalContext, plname: String) -> bool {
   let execution = context.db_pool.prep_exec("select * from players where name = ? limit 1", (plname,)).unwrap();
 
   let data: Vec<Player> = execution.map( |u_result| {
