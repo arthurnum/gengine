@@ -15,7 +15,7 @@ def render
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
   glActiveTexture(GL_TEXTURE0)
-  @texture4.bind
+  @hmap_texture.bind
   glActiveTexture(GL_TEXTURE1)
   @texture5.bind
   glActiveTexture(GL_TEXTURE2)
@@ -23,7 +23,7 @@ def render
   glActiveTexture(GL_TEXTURE3)
   @texture2.bind
   @program4.use
-  @program4.uniform_1i("texture1", 0)
+  @program4.uniform_1i("hmap_texture", 0)
   @program4.uniform_1i("texture2", 1)
   @program4.uniform_1i("texture3", 2)
   @program4.uniform_1i("texture4", 3)
@@ -95,7 +95,8 @@ fragment_ortho2d_shader_blend_info = Shader.new(:fragment, Collection::FRAGMENT_
 fragment_ortho2d_shader_menu_edge = Shader.new(:fragment, Collection::FRAGMENT_SHADER_ORTHO2D_MENU_EDGE)
 
 @program4 = Program.new
-@program4.attach_shaders(vertex_shader4, fragment_shader4)
+@program4.attach_shaders(vertex_shader, fragment_shader)
+# @program4.attach_shaders(vertex_shader4, fragment_shader4)
 @program4.link
 
 @program_cube = Program.new
@@ -128,9 +129,9 @@ fragment_ortho2d_shader_menu_edge = Shader.new(:fragment, Collection::FRAGMENT_S
   @texture2.bind
   @texture2.load("./textures/mf.bmp")
 
-  @texture4 = Drawing::Texture.new
-  @texture4.bind
-  @rawh = @texture4.load("./textures/Rivwide.bmp")
+  @hmap_texture = Drawing::Texture.new
+  @hmap_texture.bind
+  @rawh = @hmap_texture.load("./textures/Rivwide.bmp")
   @rawh = @rawh.unpack "C*"
   @world.camera.height_data = 0.step(@rawh.size - 1, 3).map { |i| @rawh[i] }
 
@@ -204,7 +205,9 @@ pp.vector = @world.camera.position.to_a
 # You can use OpenGL functions
 loop do
 
-  if active_render
+  if true
+  # Stub menu render!
+  # if active_render
     network.read
 
     render

@@ -1,67 +1,46 @@
 module GLSL
   module Collection
     VERTEX_SHADER_S3 = %q(
-        #version 330 core
-        layout(location=0) in vec3 pos;
-        layout(location=1) in vec3 normal;
-        layout(location=2) in float uva;
-        layout(location=3) in vec3 color;
-        uniform mat4 MVP;
+      #version 330 core
 
-        out vec3 fragVertex;
-        out vec3 fragNormal;
-        out float fragUVA;
-        out vec3 fragColor;
+      layout(location=0) in vec3 pos;
+      layout(location=1) in vec2 uva;
+      uniform mat4 MVP;
+      uniform sampler2D hmap_texture;
 
-        void main()
-        {
-          fragVertex = pos;
-          fragNormal = normal;
-          fragUVA = uva;
-          fragColor = color;
+      out vec2 fragUVA;
 
-          gl_Position = MVP * vec4(pos, 1.0);
-        }
-      )
+      void main()
+      {
+        fragUVA = uva;
 
-      FRAGMENT_SHADER_S3 = %q(
-          #version 330 core
+        vec4 wave = texture(hmap_texture, uva);
+        float s11 = wave.z * 50;
 
-          in vec3 fragVertex;
-          in vec3 fragNormal;
-          in float fragUVA;
-          in vec3 fragColor;
-          out vec4 out_color;
-          vec4 outputColor0;
-          vec4 outputColor1;
+        gl_Position = MVP * vec4(pos.x, s11, pos.z, 1.0);
+      }
+    )
 
-          uniform sampler2D texture1;
-          uniform sampler2D texture2;
-          uniform vec2 texture_center;
+    FRAGMENT_SHADER_S3 = %q(
+      #version 330 core
 
-          void main()
-          {
-            vec3 lightNormal = normalize(vec3(0.0, 1.0, 0.0));
-            float angle = dot(fragNormal, lightNormal);
+      in vec2 fragUVA;
+      out vec4 fragmentColor;
 
-            vec4 materialAmbientColor = vec4(fragColor, 1.0);
-            vec4 abyr = vec4(0.0, 0.0, 0.0, 0.0);
+      uniform sampler2D hmap_texture;
+      uniform sampler2D texture2;
+      uniform sampler2D texture3;
+      uniform sampler2D texture4;
+      uniform vec2 texture_center;
 
-            float dx = fragVertex.x - texture_center.x;
-            float dz = fragVertex.z - texture_center.y;
-            vec2 uv = vec2(dx, dz);
-            abyr = texture(texture1, uv).rgba * fragUVA + texture(texture2, uv).rgba * (1.0 - fragUVA);
-
-
-            vec4 lightColor = vec4(1.0, 1.0, 1.0, 1.0);
-
-            outputColor0 = abyr * abyr.a;
-            outputColor1 = materialAmbientColor;
-
-            out_color = outputColor0 + (outputColor1 - vec4(abyr.a));
-            out_color = out_color * lightColor * max(angle, 0.1);
-          }
-        )
+      void main()
+      {
+        vec3 lightColor = vec3(1.0, 1.0, 1.0);
+        vec2 uva = fragUVA * 40;
+        vec3 samplerColor = texture(texture3, uva).rgb;
+        fragmentColor = vec4(samplerColor * lightColor, 1.0);
+      }
+    )
 
     VERTEX_SHADER_S4 = %q(
       #version 330 core
@@ -83,56 +62,56 @@ module GLSL
         }
       )
 
-      FRAGMENT_SHADER_S4 = %q(
-          #version 330 core
+    FRAGMENT_SHADER_S4 = %q(
+        #version 330 core
 
-          uniform sampler2D texture1;
-          uniform sampler2D texture2;
-          uniform sampler2D texture3;
-          uniform sampler2D texture4;
-          uniform mat4 ModelView;
-          uniform mat4 NormalView;
+        uniform sampler2D texture1;
+        uniform sampler2D texture2;
+        uniform sampler2D texture3;
+        uniform sampler2D texture4;
+        uniform mat4 ModelView;
+        uniform mat4 NormalView;
 
-          in vec2 fragUVA;
+        in vec2 fragUVA;
 
-          out vec4 out_color;
+        out vec4 out_color;
 
-          vec4 outputColor1;
+        vec4 outputColor1;
 
-          const ivec3 off = ivec3(-1, 0, 1);
+        const ivec3 off = ivec3(-1, 0, 1);
 
-          void main()
-          {
-            vec3 fn11 = texture(texture2, fragUVA).xyz;
-            vec3 fn01 = textureOffset(texture2, fragUVA, off.xy).xyz;
-            vec3 fn21 = textureOffset(texture2, fragUVA, off.zy).xyz;
-            vec3 fn10 = textureOffset(texture2, fragUVA, off.yx).xyz;
-            vec3 fn12 = textureOffset(texture2, fragUVA, off.yz).xyz;
+        void main()
+        {
+          vec3 fn11 = texture(texture2, fragUVA).xyz;
+          vec3 fn01 = textureOffset(texture2, fragUVA, off.xy).xyz;
+          vec3 fn21 = textureOffset(texture2, fragUVA, off.zy).xyz;
+          vec3 fn10 = textureOffset(texture2, fragUVA, off.yx).xyz;
+          vec3 fn12 = textureOffset(texture2, fragUVA, off.yz).xyz;
 
-            vec3 fn00 = textureOffset(texture2, fragUVA, off.xx).xyz;
-            vec3 fn20 = textureOffset(texture2, fragUVA, off.zx).xyz;
-            vec3 fn02 = textureOffset(texture2, fragUVA, off.xz).xyz;
-            vec3 fn22 = textureOffset(texture2, fragUVA, off.zz).xyz;
+          vec3 fn00 = textureOffset(texture2, fragUVA, off.xx).xyz;
+          vec3 fn20 = textureOffset(texture2, fragUVA, off.zx).xyz;
+          vec3 fn02 = textureOffset(texture2, fragUVA, off.xz).xyz;
+          vec3 fn22 = textureOffset(texture2, fragUVA, off.zz).xyz;
 
-            vec3 fn = normalize(fn11+fn01+fn21+fn10+fn12+fn00+fn20+fn02+fn22);
-            vec4 fneye = NormalView * vec4(fn.xzy, 0.0);
+          vec3 fn = normalize(fn11+fn01+fn21+fn10+fn12+fn00+fn20+fn02+fn22);
+          vec4 fneye = NormalView * vec4(fn.xzy, 0.0);
 
-            vec4 r = reflect(normalize(vec4(0.0, 1.0, 0.0, 0.0)), fneye);
-            vec4 eyeCord = ModelView * vec4(fn.xzy, 0.0);
-            vec4 v = normalize(-eyeCord);
-            float spec = max( dot(v,r), 0.0 );
-            vec4 specColor = pow(spec, 4) * vec4(1,1,1,1) * 0.5;
+          vec4 r = reflect(normalize(vec4(0.0, 1.0, 0.0, 0.0)), fneye);
+          vec4 eyeCord = ModelView * vec4(fn.xzy, 0.0);
+          vec4 v = normalize(-eyeCord);
+          float spec = max( dot(v,r), 0.0 );
+          vec4 specColor = pow(spec, 4) * vec4(1,1,1,1) * 0.5;
 
-            vec3 lightNormal = normalize(vec3(0.0, 1.0, 0.0));
-            float angle = dot(fn.xzy, lightNormal);
-            vec4 lightColor = vec4(1.0, 1.0, 1.0, 1.0);
-            vec2 uva = fragUVA * 40;
-            vec4 abyr = texture(texture3, uva).rgba * fn.z + texture(texture4, uva).rgba * (1.0 - fn.z);
+          vec3 lightNormal = normalize(vec3(0.0, 1.0, 0.0));
+          float angle = dot(fn.xzy, lightNormal);
+          vec4 lightColor = vec4(1.0, 1.0, 1.0, 1.0);
+          vec2 uva = fragUVA * 40;
+          vec4 abyr = texture(texture3, uva).rgba * fn.z + texture(texture4, uva).rgba * (1.0 - fn.z);
 
-            // out_color = texture(texture3, uva) * lightColor * max(angle, 0.4);
-            out_color = abyr * lightColor * max(angle, 0.5) + specColor;
-          }
-        )
+          // out_color = texture(texture3, uva) * lightColor * max(angle, 0.4);
+          out_color = abyr * lightColor * max(angle, 0.5) + specColor;
+        }
+      )
 
       VERTEX_SHADER_CUBE = %(
         #version 330 core
