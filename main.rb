@@ -163,7 +163,7 @@ fragment_ortho2d_shader_menu_edge = Shader.new(:fragment, Collection::FRAGMENT_S
 
   # puts "Landscape size: #{@landscape.size}"
 
-time_a = Time.now
+time_a = Process.clock_gettime(Process::CLOCK_MONOTONIC)
 frames = 0.0
 
 Context::WindowCallbacks.init(window)
@@ -241,7 +241,7 @@ loop do
 
 
   frames += 1.0
-  time_b = Time.now
+  time_b = Process.clock_gettime(Process::CLOCK_MONOTONIC)
   delta = time_b - time_a
   if delta > 2.0
     @texture_fps.bind
