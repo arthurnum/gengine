@@ -6,9 +6,11 @@ module GLSL
       layout(location=0) in vec3 pos;
       layout(location=1) in vec2 uva;
       uniform mat4 MVP;
+      uniform mat4 model;
       uniform sampler2D hmap_texture;
 
       out vec2 fragUVA;
+      out vec3 fragPos;
 
       void main()
       {
@@ -17,7 +19,9 @@ module GLSL
         vec4 wave = texture(hmap_texture, uva);
         float s11 = wave.z * 50;
 
-        gl_Position = MVP * vec4(pos.x, s11, pos.z, 1.0);
+        vec4 verticeVector = vec4(pos.x, s11, pos.z, 1.0);
+        fragPos = vec3(model * verticeVector);
+        gl_Position = MVP * verticeVector;
       }
     )
 
@@ -25,6 +29,8 @@ module GLSL
       #version 330 core
 
       in vec2 fragUVA;
+      in vec3 fragPos;
+
       out vec4 fragmentColor;
 
       uniform sampler2D hmap_texture;
@@ -36,9 +42,13 @@ module GLSL
       void main()
       {
         vec3 lightColor = vec3(1.0, 1.0, 1.0);
+        vec3 lightPos = vec3(175.0, 200.0, 1875.0);
+        vec3 lightDir = normalize(lightPos - fragPos);
         vec2 uva = fragUVA * 40;
         vec3 samplerColor = texture(texture3, uva).rgb;
-        fragmentColor = vec4(samplerColor * lightColor, 1.0);
+        vec3 normal = normalize(texture(texture2, fragUVA).rgb);
+        float diff = max(dot(normal, lightDir), 0.0);
+        fragmentColor = vec4(samplerColor * lightColor * diff, 1.0);
       }
     )
 
@@ -113,27 +123,47 @@ module GLSL
         }
       )
 
-      VERTEX_SHADER_CUBE = %(
-        #version 330 core
-        layout(location=0) in vec3 pos;
-        uniform mat4 MVP;
+    VERTEX_SHADER_CUBE = %q(
+      #version 330 core
+      layout(location=0) in vec3 pos;
+      layout(location=1) in vec3 normal;
 
-        void main()
-        {
-          gl_Position = MVP * vec4(pos, 1.0);
-        }
-      )
+      uniform mat4 MVP;
+      uniform mat4 model;
 
-      FRAGMENT_SHADER_CUBE = %(
-        #version 330 core
+      out vec3 fragPos;
+      out vec3 fragNormal;
 
-        out vec4 out_color;
+      void main()
+      {
+        vec4 verticeVector = vec4(pos, 1.0);
+        fragPos = vec3(model * verticeVector);
+        fragNormal = normal;
+        gl_Position = MVP * verticeVector;
+      }
+    )
 
-        void main()
-        {
-          out_color = vec4(0.8, 0.6, 0.2, 1.0);
-        }
-      )
+    FRAGMENT_SHADER_CUBE = %q(
+      #version 330 core
+      uniform vec3 lightPos;
+
+      in vec3 fragPos;
+      in vec3 fragNormal;
+
+      out vec4 out_color;
+
+      void main()
+      {
+        vec3 lightColor = vec3(1.0, 1.0, 1.0);
+        //vec3 lightPos = vec3(0.0, 30.0, 15.0);
+        vec3 lightDir = normalize(lightPos - fragPos);
+
+        vec3 samplerColor = vec3(0.1, 0.1, 0.2);
+
+        float diff = max(dot(fragNormal, lightDir), 0.1);
+        out_color = vec4(samplerColor + lightColor * diff, 1.0);
+      }
+    )
 
       VERTEX_SHADER_ORTHO2D = %q(
           #version 330 core

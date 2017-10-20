@@ -28,13 +28,20 @@ def render
   @program4.uniform_1i("texture3", 2)
   @program4.uniform_1i("texture4", 3)
   @program4.uniform_matrix4(@world.matrix.world, 'MVP')
-  model_view = @world.matrix.model * @world.matrix.view
-  normal_view = model_view.inverse.transpose
-  @program4.uniform_matrix4(model_view, 'ModelView')
-  @program4.uniform_matrix4(normal_view, 'NormalView')
+  @program4.uniform_matrix4(@world.matrix.model, 'model')
   @landscape4.draw
 
+
   @program_cube.use
+
+  @world.matrix.push(:model)
+  @world.matrix.model = @world.matrix.model.translate(@simple_object.x, @simple_object.y, @simple_object.z)
+  @program_cube.uniform_matrix4(@world.matrix.world, 'MVP')
+  @program_cube.uniform_matrix4(@world.matrix.model, 'model')
+  @program_cube.uniform_vector(@world.camera.position, 'lightPos')
+  @simple_object.draw
+  @world.matrix.pop(:model)
+
   @cubes.each do |k, cube|
     cube_matrix = @world.matrix.world.translate(cube.x, cube.y, cube.z)
     @program_cube.uniform_matrix4(cube_matrix, 'MVP')
@@ -152,6 +159,8 @@ fragment_ortho2d_shader_menu_edge = Shader.new(:fragment, Collection::FRAGMENT_S
   @mart = Drawing::Matrix.ortho2d(0.0, window.width, 0.0, window.height)
   @cubes = {}
 
+  @simple_object = Drawing::Object::VertexNormalObject.load('./cube.pack')
+
   # puts "Landscape size: #{@landscape.size}"
 
 time_a = Time.now
@@ -205,6 +214,7 @@ pp.vector = @world.camera.position.to_a
 # You can use OpenGL functions
 loop do
 
+  menu.exit
   if true
   # Stub menu render!
   # if active_render
