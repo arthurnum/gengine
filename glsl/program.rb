@@ -2,6 +2,7 @@ module GLSL
   class Program
     def initialize
       @id = glCreateProgram
+      @uniform_locations = {}
     end
 
     def attach_shader(shader)
@@ -24,9 +25,15 @@ module GLSL
       link; use
     end
 
-    def uniform_matrix4(matrix, name)
+    def uniform_matrix4(matrix, name, count = 1)
       ul = get_uniform_location(name)
-      glUniformMatrix4fv(ul, 1, GL_TRUE, matrix.to_a.flatten.pack('F*'))
+      if matrix.is_a? Array
+        value = ""
+        matrix.each { |matx| value += matx.data }
+        glUniformMatrix4fv(ul, count, GL_TRUE, value)
+      else
+        glUniformMatrix4fv(ul, count, GL_TRUE, matrix.to_a.flatten.pack('F*'))
+      end
     end
 
     def uniform_vector(vector, name)
@@ -52,7 +59,7 @@ module GLSL
     private
 
     def get_uniform_location(name)
-      glGetUniformLocation(@id, name)
+      @uniform_locations[name] ||= glGetUniformLocation(@id, name)
     end
   end
 end

@@ -2,6 +2,7 @@ module Drawing
   require 'matrix'
 
   class Matrix < Matrix
+
     def translate(x, y, z)
       self * Drawing::Matrix[[1.0, 0.0, 0.0, x],[0.0, 1.0, 0.0, y],[0.0, 0.0, 1.0, z],[0.0, 0.0, 0.0, 1.0]]
     end
@@ -30,6 +31,10 @@ module Drawing
         [c1, c2, c3, 0],
         [ 0,  0,  0, 1]
       ]
+    end
+
+    def data
+      @data ||= self.to_a.flatten.pack('F*')
     end
 
     class << self

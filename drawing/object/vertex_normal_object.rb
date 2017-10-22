@@ -1,6 +1,7 @@
 module Drawing
   module Object
     class VertexNormalObject
+      attr_accessor :position
 
       def self.load(file_name)
         bin_data = File.binread(file_name)
@@ -10,7 +11,7 @@ module Drawing
 
       def initialize(elements_count, data)
         @elements_count = elements_count
-        @position = Vector[2.0, 21.0, 2.0]
+        @position = Vector[0.0, 0.0, 0.0]
 
         @vao = Drawing::VAO.new
         @vao.bind

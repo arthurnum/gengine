@@ -128,8 +128,7 @@ module GLSL
       layout(location=0) in vec3 pos;
       layout(location=1) in vec3 normal;
 
-      uniform mat4 MVP;
-      uniform mat4 model;
+      uniform mat4 matrices[3]; //PVM
 
       out vec3 fragPos;
       out vec3 fragNormal;
@@ -137,9 +136,9 @@ module GLSL
       void main()
       {
         vec4 verticeVector = vec4(pos, 1.0);
-        fragPos = vec3(model * verticeVector);
+        fragPos = vec3(matrices[2] * verticeVector);
         fragNormal = normal;
-        gl_Position = MVP * verticeVector;
+        gl_Position = matrices[0] * matrices[1] * matrices[2] * verticeVector;
       }
     )
 
@@ -155,7 +154,6 @@ module GLSL
       void main()
       {
         vec3 lightColor = vec3(1.0, 1.0, 1.0);
-        //vec3 lightPos = vec3(0.0, 30.0, 15.0);
         vec3 lightDir = normalize(lightPos - fragPos);
 
         vec3 samplerColor = vec3(0.1, 0.1, 0.2);

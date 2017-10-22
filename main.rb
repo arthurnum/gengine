@@ -29,18 +29,18 @@ def render
   @program4.uniform_1i("texture4", 3)
   @program4.uniform_matrix4(@world.matrix.world, 'MVP')
   @program4.uniform_matrix4(@world.matrix.model, 'model')
+
   @landscape4.draw
 
-
   @program_cube.use
-
-  @world.matrix.push(:model)
-  @world.matrix.model = @world.matrix.model.translate(@simple_object.x, @simple_object.y, @simple_object.z)
-  @program_cube.uniform_matrix4(@world.matrix.world, 'MVP')
-  @program_cube.uniform_matrix4(@world.matrix.model, 'model')
   @program_cube.uniform_vector(@world.camera.position, 'lightPos')
-  @simple_object.draw
-  @world.matrix.pop(:model)
+  @simple_objects.each do |simple_object|
+    @world.matrix.push(:model)
+    @world.matrix.model = @world.matrix.model.translate(simple_object.x, simple_object.y, simple_object.z)
+    @program_cube.uniform_matrix4([@world.matrix.projection, @world.matrix.view, @world.matrix.model], 'matrices', 3)
+    simple_object.draw
+    @world.matrix.pop(:model)
+  end
 
   @cubes.each do |k, cube|
     cube_matrix = @world.matrix.world.translate(cube.x, cube.y, cube.z)
@@ -124,7 +124,7 @@ fragment_ortho2d_shader_menu_edge = Shader.new(:fragment, Collection::FRAGMENT_S
 
 # @world.camera = Drawing::Camera.new(Vector[0.0, 3.0, -10.0], 0.0)
 @world.camera = Drawing::Camera.new(Vector[0.0, 0.0, 0.0], 0.0)
-@world.matrix.projection = Drawing::Matrix.perspective(65, window.width, window.height, 0.1, 1000.0)
+@world.matrix.projection = Drawing::Matrix.perspective(55, window.width, window.height, 0.1, 1000.0)
 @world.matrix.view = @world.camera.view
 @world.matrix.model = Drawing::Matrix.identity(4)
 
@@ -140,7 +140,8 @@ fragment_ortho2d_shader_menu_edge = Shader.new(:fragment, Collection::FRAGMENT_S
   @hmap_texture.bind
   @rawh = @hmap_texture.load("./textures/Rivwide.bmp")
   @rawh = @rawh.unpack "C*"
-  @world.camera.height_data = 0.step(@rawh.size - 1, 3).map { |i| @rawh[i] }
+  @height_map = Calculating::HeightMap.new(0.step(@rawh.size - 1, 3).map { |i| @rawh[i] })
+  @world.camera.height_data = @height_map
 
   @texture5 = Drawing::Texture.new
   @texture5.bind
@@ -159,7 +160,14 @@ fragment_ortho2d_shader_menu_edge = Shader.new(:fragment, Collection::FRAGMENT_S
   @mart = Drawing::Matrix.ortho2d(0.0, window.width, 0.0, window.height)
   @cubes = {}
 
-  @simple_object = Drawing::Object::VertexNormalObject.load('./cube.pack')
+  @simple_objects = []
+  100.times do
+    @simple_objects << Drawing::Object::VertexNormalObject.load('./cube.pack')
+    sox = rand(350)
+    soz = rand(350)
+    soy = @height_map.get_y_by(sox, soz)
+    @simple_objects.last.position = Vector[sox, soy, soz]
+  end
 
   # puts "Landscape size: #{@landscape.size}"
 
@@ -239,6 +247,13 @@ loop do
     touch_supervbo = false
   end
 
+  # @simple_objects.each do |so|
+  #   sox = so.position[0] + (0.1 * (@world.camera.position[0] <=> so.position[0]))
+  #   soz = so.position[2] + (0.1 * (@world.camera.position[2] <=> so.position[2]))
+  #   soy = @height_map.get_y_by(sox, soz)
+  #   so.position = Vector[sox, soy, soz]
+  # end
+
 
   frames += 1.0
   time_b = Process.clock_gettime(Process::CLOCK_MONOTONIC)
@@ -250,6 +265,8 @@ loop do
 
     time_a = time_b
     frames = 0
+
+
   end
 end
 
