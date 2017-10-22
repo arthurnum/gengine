@@ -26,7 +26,7 @@ module Drawing
       sinv = Math.sin(angle_rad)
       @position += Vector[-aspect * sinv, 0.0, -aspect * cosv]
 
-      yh = height_data.get_y_by(@position[0], @position[2])
+      yh = height_data.get_y_by(@position[0], @position[2]) + 1.5
       @position = Vector[@position[0], yh, @position[2]]
 
       calculate_look_at

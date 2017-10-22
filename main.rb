@@ -165,7 +165,7 @@ fragment_ortho2d_shader_menu_edge = Shader.new(:fragment, Collection::FRAGMENT_S
     @simple_objects << Drawing::Object::VertexNormalObject.load('./cube.pack')
     sox = rand(350)
     soz = rand(350)
-    soy = @height_map.get_y_by(sox, soz)
+    soy = @height_map.get_y_by(sox, soz) + 0.5
     @simple_objects.last.position = Vector[sox, soy, soz]
   end
 
