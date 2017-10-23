@@ -56,6 +56,10 @@ module GLSL
       glUniform1i(ul, value)
     end
 
+    def get_attrib_location(name)
+      glGetAttribLocation(@id, name)
+    end
+
     private
 
     def get_uniform_location(name)

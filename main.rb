@@ -34,13 +34,16 @@ def render
 
   @program_cube.use
   @program_cube.uniform_vector(@world.camera.position, 'lightPos')
-  @simple_objects.each do |simple_object|
-    @world.matrix.push(:model)
-    @world.matrix.model = @world.matrix.model.translate(simple_object.x, simple_object.y, simple_object.z)
-    @program_cube.uniform_matrix4([@world.matrix.projection, @world.matrix.view, @world.matrix.model], 'matrices', 3)
-    simple_object.draw
-    @world.matrix.pop(:model)
-  end
+  @program_cube.uniform_matrix4(@world.matrix.projection, 'projection')
+  @program_cube.uniform_matrix4(@world.matrix.view, 'view')
+  @instancing.draw
+  # @simple_objects.each do |simple_object|
+  #   @world.matrix.push(:model)
+  #   @world.matrix.model = @world.matrix.model.translate(simple_object.x, simple_object.y, simple_object.z)
+  #   @program_cube.uniform_matrix4(@world.matrix.model, 'model')
+  #   simple_object.draw
+  #   @world.matrix.pop(:model)
+  # end
 
   @cubes.each do |k, cube|
     cube_matrix = @world.matrix.world.translate(cube.x, cube.y, cube.z)
@@ -48,18 +51,18 @@ def render
     cube.draw
   end
 
-  @program_ortho2d.use
-  @program_ortho2d.uniform_matrix4(@mart, 'MVP')
+  # @program_ortho2d.use
+  # @program_ortho2d.uniform_matrix4(@mart, 'MVP')
 
-  glActiveTexture(GL_TEXTURE0)
-  @texture1.bind
-  @program_ortho2d.uniform_1i("texture1", 0)
-  @rect.draw
+  # glActiveTexture(GL_TEXTURE0)
+  # @texture1.bind
+  # @program_ortho2d.uniform_1i("texture1", 0)
+  # @rect.draw
 
-  glActiveTexture(GL_TEXTURE0)
-  @texture2.bind
-  @program_ortho2d.uniform_1i("texture1", 0)
-  @rect2.draw
+  # glActiveTexture(GL_TEXTURE0)
+  # @texture2.bind
+  # @program_ortho2d.uniform_1i("texture1", 0)
+  # @rect2.draw
 
   @program_ortho2d_info.use
   @program_ortho2d_info.uniform_matrix4(@mart, 'MVP')
@@ -109,6 +112,8 @@ fragment_ortho2d_shader_menu_edge = Shader.new(:fragment, Collection::FRAGMENT_S
 @program_cube = Program.new
 @program_cube.attach_shaders(vertex_cube_shader, fragment_cube_shader)
 @program_cube.link
+
+
 
 @program_ortho2d = Program.new
 @program_ortho2d.attach_shaders(vertex_ortho2d_shader, fragment_ortho2d_shader)
@@ -161,13 +166,15 @@ fragment_ortho2d_shader_menu_edge = Shader.new(:fragment, Collection::FRAGMENT_S
   @cubes = {}
 
   @simple_objects = []
-  100.times do
+  15000.times do
     @simple_objects << Drawing::Object::VertexNormalObject.load('./cube.pack')
     sox = rand(350)
     soz = rand(350)
     soy = @height_map.get_y_by(sox, soz) + 0.5
     @simple_objects.last.position = Vector[sox, soy, soz]
   end
+
+  @instancing = Drawing::Object::Instancing.load('./cube.pack', @world, @simple_objects)
 
   # puts "Landscape size: #{@landscape.size}"
 
