@@ -10,13 +10,12 @@ module Drawing
       def initialize(elements_count, data, world, list)
         @elements_count = elements_count
         @instances_count = list.size
+        @list = list
+        @world = world
 
         offset_data = list.map do |simple_object|
           world.matrix.model.translate(simple_object.x, simple_object.y, simple_object.z).transpose.data
         end.join
-
-        # offset_data = world.matrix.model.translate(list[0].x, list[0].y, list[0].z).transpose.data
-
 
         @vao = Drawing::VAO.new
         @vao.bind
@@ -45,7 +44,15 @@ module Drawing
       def draw
         @vao.bind
         glDrawArraysInstanced(GL_TRIANGLES, 0, @elements_count, @instances_count)
-        # glDrawArraysInstanced(GL_TRIANGLES, 0, @elements_count, @instances_count)
+      end
+
+      def update
+        offset_data = @list.map do |simple_object|
+          @world.matrix.model.translate(simple_object.x, simple_object.y, simple_object.z).transpose.data
+        end.join
+
+        @vbo_offset.bind
+        @vbo_offset.raw_data(offset_data.size, offset_data)
       end
 
     end

@@ -135,9 +135,13 @@ module GLSL
 
       out vec3 fragPos;
       out vec3 fragNormal;
+      out vec3 lightColor;
 
       void main()
       {
+        float diff = 1.0 / (gl_InstanceID / 10.0);
+        lightColor = vec3(diff, 1.0, 1.0 - diff);
+
         vec4 verticeVector = vec4(pos, 1.0);
         //fragPos = vec3(model * verticeVector);
         fragPos = vec3(mamam * verticeVector);
@@ -153,12 +157,13 @@ module GLSL
 
       in vec3 fragPos;
       in vec3 fragNormal;
+      in vec3 lightColor;
 
       out vec4 out_color;
 
       void main()
       {
-        vec3 lightColor = vec3(1.0, 1.0, 1.0);
+        //vec3 lightColor = vec3(1.0, 1.0, 1.0);
         vec3 lightDir = normalize(lightPos - fragPos);
 
         vec3 samplerColor = vec3(0.1, 0.1, 0.2);

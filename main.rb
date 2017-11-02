@@ -3,6 +3,7 @@ require_relative 'drawing/drawing'
 require_relative 'calculating/calculating'
 require_relative 'context/context'
 require_relative 'network/socket'
+require_relative 'entity/entity'
 
 include GLSL
 
@@ -37,13 +38,6 @@ def render
   @program_cube.uniform_matrix4(@world.matrix.projection, 'projection')
   @program_cube.uniform_matrix4(@world.matrix.view, 'view')
   @instancing.draw
-  # @simple_objects.each do |simple_object|
-  #   @world.matrix.push(:model)
-  #   @world.matrix.model = @world.matrix.model.translate(simple_object.x, simple_object.y, simple_object.z)
-  #   @program_cube.uniform_matrix4(@world.matrix.model, 'model')
-  #   simple_object.draw
-  #   @world.matrix.pop(:model)
-  # end
 
   @cubes.each do |k, cube|
     cube_matrix = @world.matrix.world.translate(cube.x, cube.y, cube.z)
@@ -113,8 +107,6 @@ fragment_ortho2d_shader_menu_edge = Shader.new(:fragment, Collection::FRAGMENT_S
 @program_cube.attach_shaders(vertex_cube_shader, fragment_cube_shader)
 @program_cube.link
 
-
-
 @program_ortho2d = Program.new
 @program_ortho2d.attach_shaders(vertex_ortho2d_shader, fragment_ortho2d_shader)
 @program_ortho2d.link
@@ -166,15 +158,15 @@ fragment_ortho2d_shader_menu_edge = Shader.new(:fragment, Collection::FRAGMENT_S
   @cubes = {}
 
   @simple_objects = []
-  15000.times do
-    @simple_objects << Drawing::Object::VertexNormalObject.load('./cube.pack')
+  100.times do
+    @simple_objects << Entity::Base.new
     sox = rand(350)
     soz = rand(350)
     soy = @height_map.get_y_by(sox, soz) + 0.5
     @simple_objects.last.position = Vector[sox, soy, soz]
   end
 
-  @instancing = Drawing::Object::Instancing.load('./cube.pack', @world, @simple_objects)
+  @instancing = Drawing::Object::Instancing.load('./cone.pack', @world, @simple_objects)
 
   # puts "Landscape size: #{@landscape.size}"
 
@@ -254,13 +246,14 @@ loop do
     touch_supervbo = false
   end
 
-  # @simple_objects.each do |so|
-  #   sox = so.position[0] + (0.1 * (@world.camera.position[0] <=> so.position[0]))
-  #   soz = so.position[2] + (0.1 * (@world.camera.position[2] <=> so.position[2]))
-  #   soy = @height_map.get_y_by(sox, soz)
-  #   so.position = Vector[sox, soy, soz]
-  # end
+  @simple_objects.each do |so|
+    sox = so.x + rand - 0.5
+    soz = so.z + rand - 0.5
+    soy = @height_map.get_y_by(sox, soz)
+    so.position = Vector[sox, soy, soz]
+  end
 
+  # @instancing.update
 
   frames += 1.0
   time_b = Process.clock_gettime(Process::CLOCK_MONOTONIC)
